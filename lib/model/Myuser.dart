@@ -6,6 +6,18 @@ enum AccountType
   user,admin
 }
 
+Map<String, int> accountTypeMap =
+{
+  'user':  0,
+  'admin': 1,
+};
+
+
+String getTypeNameFromInt(int type)
+{
+  return accountTypeMap.keys.firstWhere(
+          (k) => accountTypeMap[k] == type, orElse: () => "");
+}
 
 
 class MyUser
