@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app/Page/loginPage.dart';
+import 'package:flutter_app/Page/login_page.dart';
+import 'package:flutter_app/Page/company_select.dart';
 import 'package:flutter_app/widgets/constant.dart';
 
 
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Winston Ho Siew ming',
+      title: 'Inventory Manager',
       theme: ThemeData(
         brightness: Brightness.dark,
         primaryColor: kPrimaryColor,
@@ -38,9 +39,10 @@ class MyApp extends StatelessWidget {
         // fontFamily: "Montserrat",
         highlightColor: kPrimaryColor,
       ),
-      initialRoute: LoginPage.route,
+      initialRoute: CompanySelect.company,
       routes: {
         LoginPage.route: (context) => LoginPage(),
+        CompanySelect.company: (context) => CompanySelect(),
         //GamePage.route: (context) => GameStartPage(),
         //'/signup'     : (context) => new SignupPage()
       },
