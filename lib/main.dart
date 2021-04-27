@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/Page/SignUpPage.dart';
 import 'package:flutter_app/Page/loginPage.dart';
 import 'package:flutter_app/widgets/constant.dart';
 
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Winston Ho Siew ming',
+      title: 'Hello World',
       theme: ThemeData(
         brightness: Brightness.dark,
         primaryColor: kPrimaryColor,
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
       initialRoute: LoginPage.route,
       routes: {
         LoginPage.route: (context) => LoginPage(),
+        SignUpPage.route : (context) => SignUpPage()
         //GamePage.route: (context) => GameStartPage(),
         //'/signup'     : (context) => new SignupPage()
       },
