@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/Page/loginPage.dart';
+import 'package:flutter_app/widgets/constant.dart';
 
 
 import 'dart:io';
@@ -18,31 +20,30 @@ const password = '123456';
 void main() {
   FirebaseAuth.initialize(apiKey, VolatileStore());
   Firestore.initialize(projectId);
-  //print("gg");
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
-
-
     return MaterialApp(
-      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      title: 'Winston Ho Siew ming',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
+        brightness: Brightness.dark,
+        primaryColor: kPrimaryColor,
+        accentColor: kPrimaryColor,
+        // fontFamily: "Montserrat",
+        highlightColor: kPrimaryColor,
       ),
-      home: MyHomePage(),
+      initialRoute: LoginPage.route,
+      routes: {
+        LoginPage.route: (context) => LoginPage(),
+        //GamePage.route: (context) => GameStartPage(),
+        //'/signup'     : (context) => new SignupPage()
+      },
     );
   }
 }
@@ -67,22 +68,27 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
-  void _incrementCounter() async {
-
+  @override
+  void initState() {
+    super.initState();
     var auth = FirebaseAuth.instance;
     // Monitor sign-in state
     auth.signInState.listen((state) => print("Signed ${state ? "in" : "out"}"));
+  }
 
+  void _incrementCounter() async {
+
+    var auth = FirebaseAuth.instance;
     // Sign in with user credentials
-    await auth.signIn(email, password);
-
-    // Get user object
-    var user = await auth.getUser();
+    var user  = await auth.signIn("gg","dd");
     print(user);
+    // Get user object
+   // var user = await auth.getUser();
+    //print(user);
 
-    var ref = Firestore.instance.collection('test');
+    //var ref = Firestore.instance.collection('test');
 
-    await ref.document("testing").set({"gg": 1});
+    //await ref.document("testing").set({"gg": 1});
 
     final pdf = pw.Document();
 
