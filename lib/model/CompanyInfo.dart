@@ -28,6 +28,6 @@ class CompanyInfo
     id = json['id'] as String;
     location = json['location'] as String;
     name = json['name'];
-    companyStartDate = json['companyStartDate'];
+    companyStartDate = DateTime.parse(json['companyStartDate']);
   }
 }

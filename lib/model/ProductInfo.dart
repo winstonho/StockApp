@@ -34,6 +34,7 @@ class ProductInfo
   void fromJson ( Map<String, dynamic> json) {
     id = json['id'] as String;
     company = json['company'] as String;
+    productName = json['productName'] as String;
     totalQuantity = json['totalQuantity'] as int;
     totalPrice = json['totalPrice'];
     avgPrice = json['avgPrice'];

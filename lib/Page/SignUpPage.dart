@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/Page/company_select.dart';
 
 import 'package:flutter_app/Service/AuthService.dart';
+import 'package:flutter_app/Service/DatabaseService.dart';
 import 'package:flutter_app/model/MasterData.dart';
+import 'package:flutter_app/model/Myuser.dart';
 import 'package:flutter_app/widgets/constant.dart';
 import 'package:flutter_app/widgets/widgets.dart';
 
@@ -34,9 +37,6 @@ class _SignUpPageState extends State<SignUpPage> {
     if (emailFormKey.currentState.validate()) {
 
 
-      MasterData.instance.user.email = email;
-      MasterData.instance.user.name = this.name;
-      MasterData.instance.user.accountType = 1;
 
       dynamic result =
       await _authService.registerWithEmail(email, password, name);
@@ -47,6 +47,18 @@ class _SignUpPageState extends State<SignUpPage> {
           _loading = false;
         });
       }
+      else if(result is MyUser)
+        {
+          MasterData.instance.user.email = email;
+          MasterData.instance.user.name = this.name;
+          MasterData.instance.user.accountType = 0;
+          DatabaseService().updateUserData(MasterData.instance.user);
+          Navigator.of(context)
+              .pushNamedAndRemoveUntil(CompanySelect.company, (Route<dynamic> route) => false);
+        }
+
+
+
     }
     setState(() {
       _loading = false;

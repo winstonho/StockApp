@@ -37,16 +37,16 @@ class AuthServiceDesktop
       if(result != null)
       {
         print("new email create");
+
+        //await DatabaseService().uploadImageToFirebase(MasterData.instance.user.imageUrl);
+        //await DatabaseService().updateUserData(MasterData.instance.user);
+        MasterData.instance.user = firebaseUserToUser(result);
         MasterData.instance.user.uid = result.id;
         MasterData.instance.user.name = name;
         MasterData.instance.user.email = email;
-        //await DatabaseService().uploadImageToFirebase(MasterData.instance.user.imageUrl);
-        //await DatabaseService().updateUserData(MasterData.instance.user);
 
-
-        return MasterData.instance.user.email;
+        return MasterData.instance.user;
       }
-      return firebaseUserToUser(result);
     }
     catch(e)
     {

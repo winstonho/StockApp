@@ -1,6 +1,9 @@
+import 'package:firedart/auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/Page/company_select.dart';
 
 import 'package:flutter_app/Service/AuthService.dart';
+import 'package:flutter_app/model/Myuser.dart';
 import 'package:flutter_app/widgets/constant.dart';
 
 
@@ -123,10 +126,18 @@ class _LoginPageState extends State<LoginPage> {
         _loading = false;
       });
     }
+    else if(result is MyUser)
+    {
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil(CompanySelect.company, (Route<dynamic> route) => false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+
+
+
     return new Scaffold(
         key: _scaffoldKey,
         resizeToAvoidBottomInset: true,

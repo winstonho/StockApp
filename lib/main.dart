@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/Page/ProuductSelect.dart';
 import 'package:flutter_app/Page/SignUpPage.dart';
-import 'package:flutter_app/Page/loginPage.dart';
+import 'package:flutter_app/Page/company_select.dart';
+import 'package:flutter_app/Page/login_page.dart';
 import 'package:flutter_app/widgets/constant.dart';
 
 
@@ -42,7 +44,9 @@ class MyApp extends StatelessWidget {
       initialRoute: LoginPage.route,
       routes: {
         LoginPage.route: (context) => LoginPage(),
-        SignUpPage.route : (context) => SignUpPage()
+        SignUpPage.route : (context) => SignUpPage(),
+        CompanySelect.company : (context) => CompanySelect(),
+        ProductInfoSelect.route : (context) => ProductInfoSelect()
         //GamePage.route: (context) => GameStartPage(),
         //'/signup'     : (context) => new SignupPage()
       },
@@ -85,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
     var user  = await auth.signIn("gg","dd");
     print(user);
     // Get user object
-   // var user = await auth.getUser();
+    //var user = await auth.getUser();
     //print(user);
 
     //var ref = Firestore.instance.collection('test');
