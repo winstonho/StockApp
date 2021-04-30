@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 Color kPrimaryColor = Color(0xff202123);
@@ -25,10 +26,58 @@ extension HexColor on Color {
 
 Color primaryFontColour =  HexColor.fromHex("979798");
 Color backgroundColor = HexColor.fromHex("#212121");
-TextStyle primaryFont(Color c, {double size = 15})
+TextStyle primaryFont(Color c, {double size = 15, int weight = 0})
 {
+
   return GoogleFonts.robotoCondensed(
       textStyle: TextStyle(
           fontSize: size,
+          fontWeight: (weight == 0) ? FontWeight.normal : FontWeight.bold,
           color:c));
+}
+
+
+void displayDialog(BuildContext context, String title, String content) {
+  // set up the button
+  Widget okButton = ElevatedButton(
+    style: ElevatedButton.styleFrom(
+        primary: HexColor.fromHex(
+            "#313131"),
+        // background
+        onPrimary: Colors.white),
+    child: Text("OK", style: primaryFont(primaryFontColour, size: 15)),
+    onPressed: () {
+      Navigator.pop(context);
+    },
+  );
+
+  Widget cancelButton = ElevatedButton(
+    style: ElevatedButton.styleFrom(
+        primary: HexColor.fromHex(
+            "#313131"),
+        // background
+        onPrimary: Colors.white),
+    child: Text("Cancel", style: primaryFont(primaryFontColour, size: 15)),
+    onPressed: () {
+      Navigator.pop(context);
+    },
+  );
+  // set up the AlertDialog
+  AlertDialog alert = AlertDialog(
+    backgroundColor: HexColor.fromHex("#121212"),
+    title: Text(title, style: primaryFont(primaryFontColour, size: 15, weight: 1)),
+    content: Text(content, style: primaryFont(primaryFontColour, size: 15)),
+    actions: [
+      okButton,
+      cancelButton
+    ],
+  );
+
+  // show the dialog
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
 }

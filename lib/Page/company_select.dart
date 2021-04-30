@@ -35,9 +35,11 @@ class _CompanySelectState extends State<CompanySelect> {
             backgroundColor: backgroundColor,
             body: SingleChildScrollView(
               child: Column(children: [
-                Text("Select Company",
-                    style: TextStyle(
-                        fontSize: 50, color: HexColor.fromHex("#121212"))),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text("Select Company",
+                      style: primaryFont(primaryFontColour, size: 40, weight: 1)),
+                ),
                 Padding(
                   padding: EdgeInsets.only(top: 100),
                   child: StreamBuilder<List<CompanyInfo>>(
@@ -49,107 +51,103 @@ class _CompanySelectState extends State<CompanySelect> {
                           padding: EdgeInsets.only(left: 16, right: 16),
                           shrinkWrap: true,
                           crossAxisCount: 4,
-                          crossAxisSpacing: 18,
-                          mainAxisSpacing: 10,
+                          crossAxisSpacing: 30,
+                          mainAxisSpacing: 30,
                           children: snapshot.data.map((data) {
-                            return Material(
-                              elevation: 5,
-                                color: HexColor.fromHex("#212121"),
-                                borderRadius: BorderRadius.circular(10),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(data.name,
-                                          style:
-                                              primaryFont(primaryFontColour)),
-                                    ),
-                                    Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: ElevatedButton(
-                                                style:
-                                                    ElevatedButton.styleFrom(
-                                                        primary:
-                                                            HexColor.fromHex(
-                                                                "#313131"),
-                                                        // background
-                                                        onPrimary:
-                                                            Colors.white),
-                                                child: Text("Stock",
-                                                    style: primaryFont(
-                                                        primaryFontColour,
-                                                        size: 12)),
-                                                onPressed: () {
-                                                  Navigator.pushNamed(
-                                                    context,
-                                                    ProductInfoSelect.route,
-                                                    arguments:
-                                                        ScreenArguments(
-                                                      data.name,
-                                                    ),
-                                                  );
-                                                }),
-                                          ),
-                                          ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                  primary: HexColor.fromHex(
-                                                      "#313131"), // background
-                                                  onPrimary: Colors.white),
-                                              child: Text("Stock (w prices)",
-                                                  style: primaryFont(
-                                                      primaryFontColour,
-                                                      size: 12)),
-                                              onPressed: () {
-                                                Navigator.pushNamed(
-                                                  context,
-                                                  ProductInfoSelect.route,
-                                                  arguments: ScreenArguments(
-                                                    data.name,
-                                                  ),
-                                                );
-                                              })
-                                        ])
-                                  ],
-                                ));
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment:
+                                  CrossAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 8.0,
+                                      right: 8.0),
+                                  child: Padding(
+                                    padding:
+                                        const EdgeInsets.all(8.0),
+                                    child: Text(data.name,
+                                        style: primaryFont(
+                                            primaryFontColour, size: 15)),
+                                  ),
+                                ),
+                                Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.all(8.0),
+                                        child: ElevatedButton(
+                                            style:
+                                                ElevatedButton.styleFrom(
+                                                    primary:
+                                                        HexColor.fromHex(
+                                                            "#313131"),
+                                                    // background
+                                                    onPrimary:
+                                                        Colors.white),
+                                            child: Text("Stock",
+                                                style: primaryFont(
+                                                    primaryFontColour,
+                                                    size: 12)),
+                                            onPressed: () {
+                                              Navigator.pushNamed(
+                                                context,
+                                                ProductInfoSelect.route,
+                                                arguments:
+                                                    ScreenArguments(
+                                                  data.name,
+                                                ),
+                                              );
+                                            }),
+                                      ),
+                                      ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                              primary: HexColor.fromHex(
+                                                  "#313131"),
+                                              // background
+                                              onPrimary: Colors.white),
+                                          child: Text("Stock (w prices)",
+                                              style: primaryFont(
+                                                  primaryFontColour,
+                                                  size: 12)),
+                                          onPressed: () {
+                                            Navigator.pushNamed(
+                                              context,
+                                              ProductInfoSelect.route,
+                                              arguments: ScreenArguments(
+                                                data.name,
+                                              ),
+                                            );
+                                          })
+                                    ])
+                              ],
+                            );
                           }).toList(),
                         );
                       }),
                 ),
                 Align(
                   alignment: Alignment.bottomLeft,
-                  child: Container(
-                    width: 100,
-                    height: 30,
-                    child: Material(
-                      borderRadius: BorderRadius.circular(10),
-                      color: HexColor.fromHex("#272727"), // button color
-                      child: InkWell(
-                        splashColor: HexColor.fromHex("#352f44")
-                            .withOpacity(0.2), // splash color
-                        onTap: addNewCompany, // button pressed
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Icon(Icons.arrow_back_ios_outlined,
-                                size: 10, color: HexColor.fromHex("dbd8e3")),
-                            // icon
-                            Text("Logout",
-                                style: primaryFont(primaryFontColour)),
-                            // text
-                          ],
-                        ),
-                      ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 20.0, right: 8.0, top: 50, bottom: 8.0),
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                          primary: HexColor.fromHex(
+                              "#313131"),
+                          // background
+                          onPrimary: Colors.white),
+                      label: Text('Logout', style: primaryFont(primaryFontColour)),
+                      icon: Icon(Icons.arrow_back_ios, size: 15, color: primaryFontColour),
+                      onPressed: () {
+                        displayDialog(context, "Confirm Logout", "Are you sure you want to Logout?");
+                      },
                     ),
                   ),
-                ),
+                )
               ]),
             )));
   }
