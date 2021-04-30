@@ -37,7 +37,7 @@ TextStyle primaryFont(Color c, {double size = 15, int weight = 0})
 }
 
 
-void displayDialog(BuildContext context, String title, String content) {
+void displayDialog(BuildContext context, String title, String content, {Function fn = null}) {
   // set up the button
   Widget okButton = ElevatedButton(
     style: ElevatedButton.styleFrom(
@@ -47,6 +47,7 @@ void displayDialog(BuildContext context, String title, String content) {
         onPrimary: Colors.white),
     child: Text("OK", style: primaryFont(primaryFontColour, size: 15)),
     onPressed: () {
+      fn();
       Navigator.pop(context);
     },
   );
