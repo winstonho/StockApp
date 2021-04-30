@@ -17,10 +17,7 @@ const email = 'you@server.com';
 const password = '123456';
 
 
-
-
-
-void main() {
+void main() async{
   FirebaseAuth.initialize(apiKey, VolatileStore());
   Firestore.initialize(projectId);
   runApp(MyApp());
