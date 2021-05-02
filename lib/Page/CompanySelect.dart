@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_app/Page/ProuductSelect.dart';
+import 'package:flutter_app/Page/ProductSelect.dart';
 import 'package:flutter_app/Service/DatabaseService.dart';
 import 'package:flutter_app/Util/Random.dart';
 import 'package:flutter_app/model/CompanyInfo.dart';
@@ -28,8 +28,8 @@ class _CompanySelectState extends State<CompanySelect> {
 
   @override
   Widget build(BuildContext context) {
-    var size = MediaQuery.of(context).size;
-    List<String> companies = ["Trisome", "Trutorq", "Posiwell", "Trugears"];
+   // var size = MediaQuery.of(context).size;
+   // List<String> companies = ["Trisome", "Trutorq", "Posiwell", "Trugears"];
     return Container(
         child: Scaffold(
             backgroundColor: backgroundColor,

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app/Page/ProuductSelect.dart';
+import 'package:flutter_app/Page/ProductSelect.dart';
 import 'package:flutter_app/Page/SignUpPage.dart';
-import 'package:flutter_app/Page/company_select.dart';
+import 'package:flutter_app/Page/CompanySelect.dart';
 import 'package:flutter_app/Page/login_page.dart';
 import 'package:flutter_app/widgets/constant.dart';
 
