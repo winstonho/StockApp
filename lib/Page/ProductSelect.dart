@@ -38,33 +38,10 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
     await DatabaseService().addProduct(info);
   }
 
-  Widget getAllProduct() {
-    return StreamBuilder<List<ProductInfo>>(
-        stream: DatabaseService().getAllProduct(companyName),
-        builder: (context, snapshot) {
-          if(snapshot.hasError)return Text(snapshot.error.toString());
-          if(!snapshot.hasData) return Container();
-          list = snapshot.data;
-          print("List is: " + list.toString());
-          print(isSort);
-          return generateProductTable();
-        }
-    );
-  }
-
   getProductRows() {
     final rows = List.generate(
         list.length,
         (int index) => new DataRow(
-                onSelectChanged: (val) {
-                  setState(() {
-                    if (selectedIndex != index)
-                      selectedIndex = index;
-                    else
-                      selectedIndex = -1;
-                  });
-                },
-                selected: selectedIndex == index,
                 cells: [
                   DataCell(Text(list[index].id.toString(),
                       style: primaryFont(primaryFontColour, size: 15))),
@@ -82,47 +59,50 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
         builder: (context, snapshot) {
           if (snapshot.hasError) return Text(snapshot.error.toString());
           if (!snapshot.hasData) return Container();
-          return DataTable(
-              onSelectAll: (b) {},
-              showCheckboxColumn: false,
-              sortColumnIndex: columnIndex,
-              sortAscending: isSort,
-              columns: <DataColumn>[
-                DataColumn(
-                  label: Text("Product ID"),
-                  numeric: true,
-                  onSort: (i, b) {
-                    print("$i $b");
-                    setState(() {
-                      columnIndex = i;
-                      isSort = !isSort;
-                    });
-                  },
-                ),
-                DataColumn(
-                  label: Text("Product Name"),
-                  numeric: true,
-                  onSort: (i, b) {
-                    print("$i $b");
-                    setState(() {
-                      columnIndex = i;
-                      isSort = !isSort;
-                    });
-                  },
-                ),
-                DataColumn(
-                  label: Text("Quantity"),
-                  numeric: true,
-                  onSort: (i, b) {
-                    print("$i $b");
-                    setState(() {
-                      columnIndex = i;
-                      isSort = !isSort;
-                    });
-                  },
-                ),
-              ],
-              rows: getProductRows());
+          list = snapshot.data;
+          return Center(
+            child: DataTable(
+                onSelectAll: (b) {},
+                showCheckboxColumn: false,
+                sortColumnIndex: columnIndex,
+                sortAscending: isSort,
+                columns: <DataColumn>[
+                  DataColumn(
+                    label: Text("Product ID"),
+                    numeric: true,
+                    onSort: (i, b) {
+                      print("$i $b");
+                      setState(() {
+                        columnIndex = i;
+                        isSort = !isSort;
+                      });
+                    },
+                  ),
+                  DataColumn(
+                    label: Text("Product Name"),
+                    numeric: true,
+                    onSort: (i, b) {
+                      print("$i $b");
+                      setState(() {
+                        columnIndex = i;
+                        isSort = !isSort;
+                      });
+                    },
+                  ),
+                  DataColumn(
+                    label: Text("Quantity"),
+                    numeric: true,
+                    onSort: (i, b) {
+                      print("$i $b");
+                      setState(() {
+                        columnIndex = i;
+                        isSort = !isSort;
+                      });
+                    },
+                  ),
+                ],
+                rows: getProductRows()),
+          );
         });
   }
 

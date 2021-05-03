@@ -69,9 +69,12 @@ class _CompanySelectState extends State<CompanySelect> {
                             crossAxisSpacing: 70,
                             mainAxisSpacing: 30,
                             children: snapshot.data.map((data) {
+                              print(snapshot.data.indexOf(data));
+                               int delay  = snapshot.data.indexOf(data) * 100;
                               return AnimationConfiguration.staggeredGrid(
-                                position: snapshot.data.indexOf(data),
+                                position: 4,
                                 duration: const Duration(milliseconds: 500),
+                                delay:   Duration(milliseconds: delay),
                                 columnCount: 4,
                                 child: ScaleAnimation(
                                   child: FadeInAnimation(
