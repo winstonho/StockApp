@@ -83,7 +83,7 @@ class DatabaseService {
 
 
   Future addStock(StockInfo info) async{
-    return await companyCollection.document(info.id).set(info.toJson());
+    return await stockCollection.document(info.id).set(info.toJson());
   }
 
 

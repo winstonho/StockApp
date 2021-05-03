@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_app/Page/ProuductSelect.dart';
+import 'package:flutter_app/Page/login_page.dart';
+import 'package:flutter_app/Page/productInfo_select.dart';
+import 'package:flutter_app/Service/AuthService.dart';
 import 'package:flutter_app/Service/DatabaseService.dart';
 import 'package:flutter_app/Util/Random.dart';
 import 'package:flutter_app/model/CompanyInfo.dart';
@@ -24,6 +26,13 @@ class _CompanySelectState extends State<CompanySelect> {
     info.companyStartDate = DateTime.now();
     info.name = getRandString(10);
     await DatabaseService().addCompany(info);
+  }
+
+  Future logout() async
+  {
+    await AuthServiceDesktop().signOut();
+    Navigator.of(context)
+        .pushNamedAndRemoveUntil(LoginPage.route, (Route<dynamic> route) => false);
   }
 
   @override
@@ -143,7 +152,7 @@ class _CompanySelectState extends State<CompanySelect> {
                       label: Text('Logout', style: primaryFont(primaryFontColour)),
                       icon: Icon(Icons.arrow_back_ios, size: 15, color: primaryFontColour),
                       onPressed: () {
-                        displayDialog(context, "Confirm Logout", "Are you sure you want to Logout?");
+                        displayDialog(context, "Confirm Logout", "Are you sure you want to Logout?", fn:logout);
                       },
                     ),
                   ),

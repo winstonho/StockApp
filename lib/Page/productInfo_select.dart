@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_app/Page/stockInfoprice_selection.dart';
 import 'package:flutter_app/Service/DatabaseService.dart';
 import 'package:flutter_app/Util/Random.dart';
 import 'package:flutter_app/model/CompanyInfo.dart';
@@ -53,7 +54,10 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                     splashColor:
                     HexColor.fromHex("#352f44").withOpacity(0.2),
                     // splash color
-                    onTap: () {},
+                    onTap: ()
+                    {
+                      Navigator.pushNamed(context, StockInfoPriceSelect.route, arguments: data,);
+                    },
                     child: Center(
                       child: Text(data.productName,
                           style: GoogleFonts.robotoCondensed(
@@ -82,7 +86,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
             body: SingleChildScrollView(
               child: Column(children: [
                 Text("Select Product from company : "+ companyName ,
-                    style: TextStyle(fontSize: 25,color: HexColor.fromHex("#121212"))),
+                  style: primaryFont(primaryFontColour, size: 40, weight: 1)),
                 Padding(
                   padding: EdgeInsets.only(top: 100),
                   child: StreamBuilder<Object>(

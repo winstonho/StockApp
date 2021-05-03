@@ -5,6 +5,7 @@ class StockInfo
   String id;
   bool action = false;
   String productID  = "gg";
+  String remake  = "null";
   int  quantity  = 0;
   int balance = 0;
   double unitPrice   = 0;
@@ -29,12 +30,14 @@ class StockInfo
         'balance'     : balance,
         'unitPrice'   : unitPrice,
         'totalPrice'  : totalPrice,
+        'remake'      : remake,
         'action'      : action
       };
 
   void fromJson ( Map<String, dynamic> json) {
     id = json['id'] as String;
     productID = json['productID'] as String;
+    remake = json['remake'] as String;
     quantity = json['quantity'] as int;
     totalPrice = json['totalPrice'];
     balance = json['balance'];

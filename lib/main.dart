@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app/Page/ProuductSelect.dart';
-import 'package:flutter_app/Page/SignUpPage.dart';
+import 'package:flutter_app/Page/productInfo_select.dart';
+import 'package:flutter_app/Page/signup_page.dart';
 import 'package:flutter_app/Page/company_select.dart';
 import 'package:flutter_app/Page/login_page.dart';
+import 'package:flutter_app/Page/stockInfoprice_selection.dart';
 import 'package:flutter_app/widgets/constant.dart';
 
 
@@ -43,7 +44,8 @@ class MyApp extends StatelessWidget {
         LoginPage.route: (context) => LoginPage(),
         SignUpPage.route : (context) => SignUpPage(),
         CompanySelect.company : (context) => CompanySelect(),
-        ProductInfoSelect.route : (context) => ProductInfoSelect()
+        ProductInfoSelect.route : (context) => ProductInfoSelect(),
+        StockInfoPriceSelect.route : (context) => StockInfoPriceSelect()
         //GamePage.route: (context) => GameStartPage(),
         //'/signup'     : (context) => new SignupPage()
       },
