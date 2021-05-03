@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app/Page/productInfo_select.dart';
 import 'package:flutter_app/Page/signup_page.dart';
-import 'package:flutter_app/Page/company_select.dart';
-import 'package:flutter_app/Page/login_page.dart';
 import 'package:flutter_app/Page/stockInfoprice_selection.dart';
+import 'package:flutter_app/Page/ProductSelect.dart';
+import 'package:flutter_app/Page/CompanySelect.dart';
+import 'package:flutter_app/Page/Login.dart';
 import 'package:flutter_app/widgets/constant.dart';
 
 

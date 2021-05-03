@@ -96,7 +96,7 @@ class _ProductInfoSelectSelectState extends State<StockInfoPriceSelect> {
     return Center(
         child: DataTable(
             onSelectAll: (b) {},
-            showCheckboxColumn :true,
+            showCheckboxColumn :false,
             sortColumnIndex: coloumIndex,
             sortAscending: isSort,
             columns: <DataColumn>[

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/Page/company_select.dart';
+import 'package:flutter_app/Page/CompanySelect.dart';
 
 import 'package:flutter_app/Service/AuthService.dart';
 import 'package:flutter_app/Service/DatabaseService.dart';
