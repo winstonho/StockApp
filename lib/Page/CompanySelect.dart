@@ -37,6 +37,8 @@ class _CompanySelectState extends State<CompanySelect> {
 
 
 
+
+
   @override
   Widget build(BuildContext context) {
     // var size = MediaQuery.of(context).size;
@@ -68,8 +70,8 @@ class _CompanySelectState extends State<CompanySelect> {
                             mainAxisSpacing: 30,
                             children: snapshot.data.map((data) {
                               return AnimationConfiguration.staggeredGrid(
-                                position: 3,
-                                duration: const Duration(milliseconds: 375),
+                                position: snapshot.data.indexOf(data),
+                                duration: const Duration(milliseconds: 500),
                                 columnCount: 4,
                                 child: ScaleAnimation(
                                   child: FadeInAnimation(
