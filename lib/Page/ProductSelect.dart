@@ -7,7 +7,6 @@ import 'package:flutter_app/Util/Random.dart';
 import 'package:flutter_app/model/ProductInfo.dart';
 import 'package:flutter_app/model/Route/ScreenArguments.dart';
 import 'package:flutter_app/widgets/constant.dart';
-//import 'package:flutter_app/widgets/form.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
@@ -24,6 +23,11 @@ class ProductInfoSelect extends StatefulWidget {
 class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
   String companyName = "";
   bool withPrices = false;
+  int columnIndex = 0;
+
+  bool isSort = true;
+  List<ProductInfo> list;
+  int selectedIndex = 0;
 
   Future addNewProduct() async {
     ProductInfo info = ProductInfo();
@@ -32,91 +36,94 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
     info.productDate = DateTime.now();
     info.productName = getRandString(10);
     await DatabaseService().addProduct(info);
-    print("testing");
   }
-
-  //Form Date
 
   Widget getAllProduct() {
     return StreamBuilder<List<ProductInfo>>(
         stream: DatabaseService().getAllProduct(companyName),
         builder: (context, snapshot) {
-          if (snapshot.hasError) return Text(snapshot.error.toString());
-          if (!snapshot.hasData) return Container();
-          return GridView.count(
-            childAspectRatio: 1,
-            padding: EdgeInsets.only(left: 16, right: 16),
-            shrinkWrap: true,
-            crossAxisCount: 4,
-            crossAxisSpacing: 18,
-            mainAxisSpacing: 10,
-            children: snapshot.data.map((data) {
-              return Material(
-                  elevation: 10,
-                  color: HexColor.fromHex("#352f44"),
-                  borderRadius: BorderRadius.circular(10),
-                  child: InkWell(
-                    splashColor: HexColor.fromHex("#352f44").withOpacity(0.2),
-                    // splash color
-                    onTap: () {
-                      Navigator.pushNamed(context, StockInfoPriceSelect.route, arguments: data,);},
-                    child: Center(
-                      child: Text(data.productName,
-                          style: GoogleFonts.robotoCondensed(
-                              textStyle: TextStyle(
-                                  fontSize: 15,
-                                  color: HexColor.fromHex("dbd8e3")))),
-                    ),
-                  ));
-            }).toList(),
-          );
-        });
+          if(snapshot.hasError)return Text(snapshot.error.toString());
+          if(!snapshot.hasData) return Container();
+          list = snapshot.data;
+          print("List is: " + list.toString());
+          print(isSort);
+          return generateProductTable();
+        }
+    );
   }
 
-  Widget getAllProduct1() {
+  getProductRows() {
+    final rows = List.generate(
+        list.length,
+        (int index) => new DataRow(
+                onSelectChanged: (val) {
+                  setState(() {
+                    if (selectedIndex != index)
+                      selectedIndex = index;
+                    else
+                      selectedIndex = -1;
+                  });
+                },
+                selected: selectedIndex == index,
+                cells: [
+                  DataCell(Text(list[index].id.toString(),
+                      style: primaryFont(primaryFontColour, size: 15))),
+                  DataCell(Text(list[index].productName.toString(),
+                      style: primaryFont(primaryFontColour, size: 15))),
+                  DataCell(Text(list[index].totalQuantity.toString(),
+                      style: primaryFont(primaryFontColour, size: 15))),
+                ]));
+    return rows;
+  }
+
+  Widget generateProductTable() {
     return StreamBuilder<List<ProductInfo>>(
         stream: DatabaseService().getAllProduct(companyName),
         builder: (context, snapshot) {
           if (snapshot.hasError) return Text(snapshot.error.toString());
           if (!snapshot.hasData) return Container();
-          return Table(
-            border: TableBorder.symmetric(
-                inside: BorderSide(width: 2, color: primaryFontColour),
-                outside: BorderSide(width: 3, color: primaryFontColour)),
-            children: [
-              GenerateHeader(true),
-              for (int i = 0; i < snapshot.data.length; ++i) GenerateRow(context, snapshot.data[i], true)
-            ],
-          );
+          return DataTable(
+              onSelectAll: (b) {},
+              showCheckboxColumn: false,
+              sortColumnIndex: columnIndex,
+              sortAscending: isSort,
+              columns: <DataColumn>[
+                DataColumn(
+                  label: Text("Product ID"),
+                  numeric: true,
+                  onSort: (i, b) {
+                    print("$i $b");
+                    setState(() {
+                      columnIndex = i;
+                      isSort = !isSort;
+                    });
+                  },
+                ),
+                DataColumn(
+                  label: Text("Product Name"),
+                  numeric: true,
+                  onSort: (i, b) {
+                    print("$i $b");
+                    setState(() {
+                      columnIndex = i;
+                      isSort = !isSort;
+                    });
+                  },
+                ),
+                DataColumn(
+                  label: Text("Quantity"),
+                  numeric: true,
+                  onSort: (i, b) {
+                    print("$i $b");
+                    setState(() {
+                      columnIndex = i;
+                      isSort = !isSort;
+                    });
+                  },
+                ),
+              ],
+              rows: getProductRows());
         });
-  }
-
-  TableRow GenerateHeader(bool withPrices) {
-    TextStyle s = primaryFont(primaryFontColour, size: 15, weight: 1);
-    return TableRow(children: [
-      TableCell(
-          child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text("Product ID", style: s),
-      )),
-      TableCell(
-          child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text("Product Name", style: s),
-      )),
-      TableCell(
-          child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text("Quantity", style: s),
-      )),
-      (withPrices)
-          ? TableCell(
-              child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text("Average Cost", style: s),
-            ))
-          : null
-    ]);
   }
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -136,8 +143,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
           padding: const EdgeInsets.all(8.0),
           child: ListTile(
               leading: Text("Remarks:", style: style_),
-              subtitle:
-              Flexible(
+              subtitle: Flexible(
                 child: TextFormField(
                   style: style_,
                   maxLines: null,
@@ -146,8 +152,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                     hintStyle: style_,
                   ),
                 ),
-              )
-          ),
+              )),
         ),
       ),
     );
@@ -169,9 +174,9 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                 child: TextFormField(
                   style: style_,
                   decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 15),
-                      hintText: 'Unit Price',
-                      hintStyle: style_,
+                    contentPadding: EdgeInsets.symmetric(vertical: 15),
+                    hintText: 'Unit Price',
+                    hintStyle: style_,
                   ),
                 ),
               )
@@ -229,18 +234,12 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                       hintText: 'Quantity',
                       hintStyle: style_,
                       border: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Colors.red
-                          )
-                      )
-                  ),
-                  onChanged: (value)
-                  {
+                          borderSide: BorderSide(color: Colors.red))),
+                  onChanged: (value) {
                     setState(() {
                       quantity = int.parse(value);
                     });
-                  }
-                  ,
+                  },
                 ),
               )
             ],
@@ -302,7 +301,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                     inputQuantity(context),
                     inputPrice(context),
                     Divider(
-                        color: HexColor.fromHex("#979798"),
+                      color: HexColor.fromHex("#979798"),
                     ),
                     inputTotalPrice(context),
                     inputRemarks(context),
@@ -328,58 +327,6 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
         });
   }
 
-  TableRow GenerateRow(BuildContext context,ProductInfo p, bool withPrices) {
-    TextStyle s = primaryFont(primaryFontColour, size: 15, weight: 0);
-    TextStyle sBold = primaryFont(primaryFontColour, size: 15, weight: 1);
-
-    //ProductInfo p = ProductInfo();
-   // p.id = "A001";
-    //p.productName = "Apples";
-   // p.totalQuantity = 5;
-
-    final sgd = Currency.create('SGD', 2);
-    final averagePrice  = sgd.parse(r'$10.25');
-    return TableRow(children: [
-      TableCell(
-          child: Row(children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(p.id, style: sBold),
-        ),
-        Spacer(),
-        Container(
-          height: 30,
-          child: IconButton(
-            onPressed: () {
-              showInformationDialog(context);
-            },
-            splashColor: Colors.white,
-            splashRadius: 15,
-            icon: Icon(Icons.my_library_add_outlined,
-                size: 15, color: primaryFontColour),
-          ),
-        )
-      ])),
-      TableCell(
-          child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text(p.productName, style: s),
-      )),
-      TableCell(
-          child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text(p.totalQuantity.toString(), style: s),
-      )),
-      (withPrices)
-          ? TableCell(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text((averagePrice /4).toString(), style: s),
-              ),
-            )
-          : null
-    ]);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -399,11 +346,10 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
           child: Padding(
             padding: EdgeInsets.all(50),
             child: StreamBuilder<Object>(
-              stream: DatabaseService().productCollection.stream,
-              builder: (context, snapshot) {
-                return getAllProduct1();
-              }
-            ),
+                stream: DatabaseService().productCollection.stream,
+                builder: (context, snapshot) {
+                  return generateProductTable();
+                }),
           ),
         ));
   }
