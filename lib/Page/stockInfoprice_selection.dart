@@ -23,7 +23,7 @@ class _ProductInfoSelectSelectState extends State<StockInfoPriceSelect> {
 
   ProductInfo productInfo;
   bool isSort = true;
-  int coloumIndex = 0;
+  int columnIndex = 0;
   List<StockInfo> list;
   int selectedIndex = 0;
   Future addNewStock() async
@@ -43,7 +43,6 @@ class _ProductInfoSelectSelectState extends State<StockInfoPriceSelect> {
   getRowsStock() {
     final rows2 = new List.generate(list.length, (int index) => new DataRow(
         onSelectChanged: (val) {
-          print("temp");
           setState(() {
             if(selectedIndex != index)
           selectedIndex = index;
@@ -61,7 +60,7 @@ class _ProductInfoSelectSelectState extends State<StockInfoPriceSelect> {
 
   void sort()
   {
-    switch (coloumIndex)
+    switch (columnIndex)
     {
       case 0:
         if(isSort){
@@ -97,7 +96,7 @@ class _ProductInfoSelectSelectState extends State<StockInfoPriceSelect> {
         child: DataTable(
             onSelectAll: (b) {},
             showCheckboxColumn :false,
-            sortColumnIndex: coloumIndex,
+            sortColumnIndex: columnIndex,
             sortAscending: isSort,
             columns: <DataColumn>[
               DataColumn(
@@ -106,7 +105,7 @@ class _ProductInfoSelectSelectState extends State<StockInfoPriceSelect> {
                 onSort: (i, b) {
                   print("$i $b");
                   setState(() {
-                    coloumIndex = i;
+                    columnIndex = i;
                     isSort = !isSort;
 
                   });
@@ -118,7 +117,7 @@ class _ProductInfoSelectSelectState extends State<StockInfoPriceSelect> {
                 onSort: (i, b) {
                   print("$i $b");
                   setState(() {
-                    coloumIndex = i;
+                    columnIndex = i;
                     isSort = !isSort;
                   });
                 },
@@ -129,7 +128,7 @@ class _ProductInfoSelectSelectState extends State<StockInfoPriceSelect> {
                 onSort: (i, b) {
                   print("$i $b");
                   setState(() {
-                    coloumIndex = i;
+                    columnIndex = i;
                     isSort = !isSort;
 
                   });

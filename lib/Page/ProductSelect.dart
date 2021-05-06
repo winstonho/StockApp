@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app/Page/stockInfoprice_selection.dart';
+
 import 'package:flutter_app/Service/DatabaseService.dart';
 import 'package:flutter_app/Util/Random.dart';
 import 'package:flutter_app/model/ProductInfo.dart';
 import 'package:flutter_app/model/Route/ScreenArguments.dart';
 import 'package:flutter_app/widgets/constant.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'package:money2/money2.dart';
@@ -41,19 +41,67 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
   getProductRows() {
     final rows = List.generate(
         list.length,
-        (int index) => new DataRow(
-                cells: [
-                  DataCell(Text(list[index].id.toString(),
-                      style: primaryFont(primaryFontColour, size: 15))),
-                  DataCell(Text(list[index].productName.toString(),
-                      style: primaryFont(primaryFontColour, size: 15))),
-                  DataCell(Text(list[index].totalQuantity.toString(),
-                      style: primaryFont(primaryFontColour, size: 15))),
-                ]));
+        (int index) => new DataRow(selected: false, cells: [
+              DataCell(Row(children: [
+                Text(list[index].id.toString()),
+                SizedBox(width: 20),
+                IconButton(
+                    splashRadius: 15,
+                    onPressed: () {
+                      viewStock(list[index].id.toString());
+                    },
+                    icon: Icon(Icons.my_library_add_outlined),
+                    iconSize: 15,
+                    color: HexColor.fromHex("979798"))
+              ])),
+              DataCell(Text(list[index].productName.toString(),
+                  style: primaryFont(primaryFontColour, size: 15))),
+              DataCell(Text(list[index].totalQuantity.toString(),
+                  style: primaryFont(primaryFontColour, size: 15))),
+              DataCell(Text(list[index].avgPrice.toString(),
+                  style: primaryFont(primaryFontColour, size: 15))),
+            ]));
     return rows;
   }
 
-  Widget generateProductTable() {
+  Future<void> viewStock(String productID) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          DateFormat df = DateFormat("dd MMMM yyyy");
+          String contentText = "Content of Dialog";
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                backgroundColor: backgroundColor,
+                title: Text(productID.toString(), style: primaryFont(primaryFontColour,size: 13, weight: 1)),
+                content:
+                Column(
+                  children: [
+                    Text("Test"),
+                  ],
+                ),
+                actions: <Widget>[
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text("Cancel"),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        contentText = "Changed Content of Dialog";
+                      });
+                    },
+                    child: Text("Change"),
+                  ),
+                ],
+              );
+            },
+          );
+        });
+  }
+
+  Widget generateProductTable(BuildContext context) {
     return StreamBuilder<List<ProductInfo>>(
         stream: DatabaseService().getAllProduct(companyName),
         builder: (context, snapshot) {
@@ -66,10 +114,14 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                 showCheckboxColumn: false,
                 sortColumnIndex: columnIndex,
                 sortAscending: isSort,
+                horizontalMargin: MediaQuery.of(context).size.width * 0.1,
+                headingTextStyle:
+                    primaryFont(primaryFontColour, size: 15, weight: 1),
+                dataTextStyle:
+                    primaryFont(primaryFontColour, size: 15, weight: 0),
                 columns: <DataColumn>[
                   DataColumn(
-                    label: Text("Product ID"),
-                    numeric: true,
+                    label: Text("Product ID", textAlign: TextAlign.left),
                     onSort: (i, b) {
                       print("$i $b");
                       setState(() {
@@ -80,7 +132,6 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                   ),
                   DataColumn(
                     label: Text("Product Name"),
-                    numeric: true,
                     onSort: (i, b) {
                       print("$i $b");
                       setState(() {
@@ -91,6 +142,17 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                   ),
                   DataColumn(
                     label: Text("Quantity"),
+                    numeric: true,
+                    onSort: (i, b) {
+                      print("$i $b");
+                      setState(() {
+                        columnIndex = i;
+                        isSort = !isSort;
+                      });
+                    },
+                  ),
+                  DataColumn(
+                    label: Text("Average Cost"),
                     numeric: true,
                     onSort: (i, b) {
                       print("$i $b");
@@ -307,7 +369,6 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
         });
   }
 
-
   @override
   Widget build(BuildContext context) {
     final ScreenArguments args =
@@ -328,7 +389,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
             child: StreamBuilder<Object>(
                 stream: DatabaseService().productCollection.stream,
                 builder: (context, snapshot) {
-                  return generateProductTable();
+                  return generateProductTable(context);
                 }),
           ),
         ));
