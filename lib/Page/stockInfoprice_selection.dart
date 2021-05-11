@@ -28,7 +28,6 @@ class _ProductInfoSelectSelectState extends State<StockInfoPriceSelect> {
   int selectedIndex = 0;
   Future addNewStock() async
   {
-
     StockInfo info = StockInfo();
     info.id = Uuid().v4();
     info.productID = productInfo.id;
@@ -40,7 +39,7 @@ class _ProductInfoSelectSelectState extends State<StockInfoPriceSelect> {
     print("testing");
   }
 
-  getRowsStock() {
+  List<DataRow> getRowsStock() {
     final rows2 = new List.generate(list.length, (int index) => new DataRow(
         onSelectChanged: (val) {
           setState(() {

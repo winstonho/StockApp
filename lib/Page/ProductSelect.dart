@@ -6,11 +6,13 @@ import 'package:flutter_app/Service/DatabaseService.dart';
 import 'package:flutter_app/Util/Random.dart';
 import 'package:flutter_app/model/ProductInfo.dart';
 import 'package:flutter_app/model/Route/ScreenArguments.dart';
+import 'package:flutter_app/model/StockInfo.dart';
 import 'package:flutter_app/widgets/constant.dart';
 
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'package:money2/money2.dart';
+
 
 class ProductInfoSelect extends StatefulWidget {
   static const String route = '/productInfo';
@@ -23,12 +25,131 @@ class ProductInfoSelect extends StatefulWidget {
 class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
   String companyName = "";
   bool withPrices = false;
+  int selectedIndex = 0;
+
+  List<ProductInfo> list;
   int columnIndex = 0;
 
   bool isSort = true;
-  List<ProductInfo> list;
-  int selectedIndex = 0;
+  ProductInfo productInfo;
 
+  /************************* Stock Stuff ************************************/
+
+  List<StockInfo> stockList;
+  int stockColumnIndex = 0;
+  bool isStockSort = true;
+  int selectedStockIndex = 0;
+  StockInfo stockInfo;
+
+  DataCell makeStockCell(String value) {
+    return DataCell(
+        Text(value, style: primaryFont(primaryFontColour, size: 15)));
+  }
+
+  getStockRows() {
+    final rows = List.generate(
+        stockList.length,
+        (int index) => new DataRow(selected: false, cells: [
+              makeStockCell(stockList[index].stockDate.toString()),
+              (stockList[index].action)
+                  ? makeStockCell(stockList[index].quantity.toString())
+                  : makeStockCell(""),
+              (stockList[index].action)
+                  ? makeStockCell("")
+                  : makeStockCell(stockList[index].quantity.toString()),
+              makeStockCell(stockList[index].balance.toString()),
+              makeStockCell(stockList[index].unitPrice.toString()),
+              makeStockCell(stockList[index].totalPrice.toString()),
+              makeStockCell(stockList[index].remake),
+            ]));
+
+    print(stockList);
+    return rows;
+  }
+
+  Widget generateStockTable(String id) {
+    print("ID is: " + id);
+    return StreamBuilder<List<StockInfo>>(
+        stream: DatabaseService().getAllStock(id),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) return Text(snapshot.error.toString());
+          if (!snapshot.hasData) return Container();
+          stockList = snapshot.data;
+
+          return DataTable(
+              onSelectAll: (b) {},
+              showCheckboxColumn: false,
+              sortColumnIndex: columnIndex,
+              sortAscending: isSort,
+              horizontalMargin: MediaQuery.of(context).size.width * 0.1,
+              headingTextStyle:
+                  primaryFont(primaryFontColour, size: 15, weight: 1),
+              dataTextStyle:
+                  primaryFont(primaryFontColour, size: 15, weight: 0),
+              columns: <DataColumn>[
+                DataColumn(
+                  label: Text("Date", textAlign: TextAlign.left),
+                ),
+                DataColumn(
+                  label: Text("In"),
+                ),
+                DataColumn(
+                  label: Text("Out"),
+                ),
+                DataColumn(
+                  label: Text("Balance"),
+                  numeric: true,
+                ),
+                DataColumn(
+                  label: Text("Unit Price"),
+                  numeric: true,
+                ),
+                DataColumn(
+                  label: Text("Total"),
+                  numeric: true,)
+                  ,
+                DataColumn(
+                  label: Text("Remarks"),
+                ),
+              ],
+              rows: getStockRows());
+        });
+  }
+
+  Future<void> viewStockRecord(String productID) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          DateFormat df = DateFormat("dd MMMM yyyy");
+          String contentText = "Content of Dialog";
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                backgroundColor: backgroundColor,
+                title: Text(productID.toString(),
+                    style: primaryFont(primaryFontColour, size: 13, weight: 1)),
+                content: generateStockTable(productID),
+                actions: <Widget>[
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text("Cancel"),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        contentText = "Changed Content of Dialog";
+                      });
+                    },
+                    child: Text("Change"),
+                  ),
+                ],
+              );
+            },
+          );
+        });
+  }
+
+  /************************* Product Stuff ************************************/
   Future addNewProduct() async {
     ProductInfo info = ProductInfo();
     info.id = Uuid().v4();
@@ -48,7 +169,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                 IconButton(
                     splashRadius: 15,
                     onPressed: () {
-                      viewStock(list[index].id.toString());
+                      viewStockRecord(list[index].id.toString());
                     },
                     icon: Icon(Icons.my_library_add_outlined),
                     iconSize: 15,
@@ -62,43 +183,6 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                   style: primaryFont(primaryFontColour, size: 15))),
             ]));
     return rows;
-  }
-
-  Future<void> viewStock(String productID) {
-    return showDialog(
-        context: context,
-        builder: (context) {
-          DateFormat df = DateFormat("dd MMMM yyyy");
-          String contentText = "Content of Dialog";
-          return StatefulBuilder(
-            builder: (context, setState) {
-              return AlertDialog(
-                backgroundColor: backgroundColor,
-                title: Text(productID.toString(), style: primaryFont(primaryFontColour,size: 13, weight: 1)),
-                content:
-                Column(
-                  children: [
-                    Text("Test"),
-                  ],
-                ),
-                actions: <Widget>[
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text("Cancel"),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        contentText = "Changed Content of Dialog";
-                      });
-                    },
-                    child: Text("Change"),
-                  ),
-                ],
-              );
-            },
-          );
-        });
   }
 
   Widget generateProductTable(BuildContext context) {
