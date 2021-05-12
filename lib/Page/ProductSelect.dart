@@ -13,7 +13,6 @@ import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'package:money2/money2.dart';
 
-
 class ProductInfoSelect extends StatefulWidget {
   static const String route = '/productInfo';
 
@@ -42,11 +41,14 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
   StockInfo stockInfo;
 
   DataCell makeStockCell(String value) {
+    if (value == null) value = "-";
+
     return DataCell(
         Text(value, style: primaryFont(primaryFontColour, size: 15)));
   }
 
   getStockRows() {
+    print(stockList[0].remake);
     final rows = List.generate(
         stockList.length,
         (int index) => new DataRow(selected: false, cells: [
@@ -60,7 +62,9 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
               makeStockCell(stockList[index].balance.toString()),
               makeStockCell(stockList[index].unitPrice.toString()),
               makeStockCell(stockList[index].totalPrice.toString()),
-              makeStockCell(stockList[index].remake),
+              (stockList[index].remake == null)
+                  ? makeStockCell(stockList[index].remake)
+                  : makeStockCell(""),
             ]));
 
     print(stockList);
@@ -106,8 +110,8 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                 ),
                 DataColumn(
                   label: Text("Total"),
-                  numeric: true,)
-                  ,
+                  numeric: true,
+                ),
                 DataColumn(
                   label: Text("Remarks"),
                 ),
@@ -126,22 +130,44 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
             builder: (context, setState) {
               return AlertDialog(
                 backgroundColor: backgroundColor,
-                title: Text(productID.toString(),
-                    style: primaryFont(primaryFontColour, size: 13, weight: 1)),
+                title: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(width: 3.0, color: primaryFontColour),
+                    borderRadius: BorderRadius.all(Radius.circular(
+                            5.0) //                 <--- border radius here
+                        ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(productID.toString(),
+                        style: primaryFont(primaryFontColour,
+                            size: 20, weight: 1)),
+                  ),
+                ),
                 content: generateStockTable(productID),
                 actions: <Widget>[
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text("Cancel"),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        contentText = "Changed Content of Dialog";
-                      });
-                    },
-                    child: Text("Change"),
-                  ),
+                  ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                          primary: HexColor.fromHex("#313131"),
+                          // background
+                          onPrimary: Colors.white),
+                      label: Text("Add", style: primaryFont(primaryFontColour)),
+                      icon: Icon(Icons.add, color: primaryFontColour, size: 13),
+                      onPressed: () {
+                        AddForm(productID, context);
+                      }),
+                  ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                          primary: HexColor.fromHex("#313131"),
+                          // background
+                          onPrimary: Colors.white),
+                      label: Text("Withdraw",
+                          style: primaryFont(primaryFontColour)),
+                      icon: Icon(Icons.remove,
+                          color: primaryFontColour, size: 13)),
+                  renderButton(context, "Back", fn: () {
+                    Navigator.pop(context);
+                  }),
                 ],
               );
             },
@@ -255,30 +281,22 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   DateTime selectedDate = DateTime.now();
-  int quantity = 1;
+  int quantity = 0;
   TextStyle style_ = primaryFont(primaryFontColour, size: 13, weight: 0);
   String price;
   String remarks;
 
   Widget inputRemarks(BuildContext context) {
-    return Container(
-      width: 300,
-      child: Card(
-        color: HexColor.fromHex("#292929"),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ListTile(
-              leading: Text("Remarks:", style: style_),
-              subtitle: Flexible(
-                child: TextFormField(
-                  style: style_,
-                  maxLines: null,
-                  decoration: InputDecoration(
-                    hintText: 'Remarks',
-                    hintStyle: style_,
-                  ),
-                ),
-              )),
+    return Card(
+      color: HexColor.fromHex("#292929"),
+      child: TextFormField(
+        style: style_,
+        maxLines: null,
+        decoration: InputDecoration(
+          isDense: true,
+          contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+          hintText: 'Remarks:',
+          hintStyle: style_,
         ),
       ),
     );
@@ -293,7 +311,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: <Widget>[
-              Icon(Icons.calendar_today,
+              Icon(Icons.attach_money,
                   color: HexColor.fromHex("#979798"), size: 15),
               SizedBox(width: 20),
               Expanded(
@@ -344,7 +362,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: <Widget>[
-              Icon(Icons.calendar_today,
+              Icon(Icons.account_balance,
                   color: HexColor.fromHex("#979798"), size: 15),
               SizedBox(width: 20),
               Expanded(
@@ -375,78 +393,84 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
     );
   }
 
-  Future<void> showInformationDialog(BuildContext context) {
+  Future<void> AddForm(String productID, BuildContext context) {
     return showDialog(
         context: context,
         builder: (context) {
           DateFormat df = DateFormat("dd MMMM yyyy");
-          String contentText = "Content of Dialog";
+          String contentText = "Add " + productID;
           return StatefulBuilder(
             builder: (context, setState) {
-              return AlertDialog(
-                backgroundColor: backgroundColor,
-                title: Text("Title of Dialog"),
-                content: Column(
-                  children: [
-                    Card(
-                      color: HexColor.fromHex("#292929"),
+              return Container(
+                width: 500,
+                height: 300,
+                child: AlertDialog(
+                  insetPadding: EdgeInsets.symmetric(vertical: 50),
+                  backgroundColor: backgroundColor,
+                  title: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(width: 2, color: primaryFontColour),
+                        borderRadius: BorderRadius.all(Radius.circular(
+                                5.0) //                 <--- border radius here
+                            ),
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          children: <Widget>[
-                            Icon(Icons.calendar_today,
-                                color: HexColor.fromHex("#979798"), size: 15),
-                            SizedBox(width: 20),
-                            TextButton(
-                                onPressed: () async {
-                                  final DateTime picked = await showDatePicker(
-                                      context: context,
-                                      initialDate: selectedDate,
-                                      firstDate: DateTime(2015, 8),
-                                      lastDate: DateTime(2101));
-                                  if (picked != null && picked != selectedDate)
-                                    setState(() {
-                                      selectedDate = picked;
-                                      print("selectedDate is: " +
-                                          selectedDate.toString());
-                                    });
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.only(right: 40.0),
-                                  child: Text(
-                                      df.format(selectedDate).toString(),
-                                      style: primaryFont(
-                                          HexColor.fromHex("#979798"),
-                                          size: 15,
-                                          weight: 0)),
-                                ))
-                          ],
+                        child: Text(contentText,
+                            style: primaryFont(primaryFontColour,
+                                size: 13, weight: 1)),
+                      )),
+                  content: Column(
+                    children: [
+                      Card(
+                        color: HexColor.fromHex("#292929"),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            children: <Widget>[
+                              Icon(Icons.calendar_today,
+                                  color: HexColor.fromHex("#979798"), size: 15),
+                              SizedBox(width: 20),
+                              TextButton(
+                                  onPressed: () async {
+                                    final DateTime picked =
+                                        await showDatePicker(
+                                            context: context,
+                                            initialDate: selectedDate,
+                                            firstDate: DateTime(2015, 8),
+                                            lastDate: DateTime(2101));
+                                    if (picked != null &&
+                                        picked != selectedDate)
+                                      setState(() {
+                                        selectedDate = picked;
+                                        print("selectedDate is: " +
+                                            selectedDate.toString());
+                                      });
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 40.0),
+                                    child: Text(
+                                        df.format(selectedDate).toString(),
+                                        style: primaryFont(
+                                            HexColor.fromHex("#979798"),
+                                            size: 13,
+                                            weight: 0)),
+                                  ))
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    inputQuantity(context),
-                    inputPrice(context),
-                    Divider(
-                      color: HexColor.fromHex("#979798"),
-                    ),
-                    inputTotalPrice(context),
-                    inputRemarks(context),
-                  ],
+                      inputQuantity(context),
+                      inputPrice(context),
+                      Divider(
+                        color: HexColor.fromHex("#979798"),
+                      ),
+                      inputTotalPrice(context),
+                      inputRemarks(context),
+                    ],
+                  ),
+                  actions: <Widget>[],
                 ),
-                actions: <Widget>[
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text("Cancel"),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        contentText = "Changed Content of Dialog";
-                      });
-                    },
-                    child: Text("Change"),
-                  ),
-                ],
               );
             },
           );

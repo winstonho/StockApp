@@ -1,15 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 Color kPrimaryColor = Color(0xff202123);
 Color kTextColor = Color(0xff5477AB);
-String appTitle= "Inventory Manager";
-
-
+String appTitle = "Inventory Manager";
 
 extension HexColor on Color {
   /// String is in the format "aabbcc" or "ffaabbcc" with an optional leading "#".
-  static Color fromHex(String hexString)  {
+  static Color fromHex(String hexString) {
     final buffer = StringBuffer();
     if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
     buffer.write(hexString.replaceFirst('#', ''));
@@ -24,26 +23,36 @@ extension HexColor on Color {
       '${blue.toRadixString(16).padLeft(2, '0')}';
 }
 
-Color primaryFontColour =  HexColor.fromHex("979798");
+Color primaryFontColour = HexColor.fromHex("979798");
 Color backgroundColor = HexColor.fromHex("#212121");
-TextStyle primaryFont(Color c, {double size = 15, int weight = 0})
-{
 
+TextStyle primaryFont(Color c, {double size = 15, int weight = 0}) {
   return GoogleFonts.robotoCondensed(
       textStyle: TextStyle(
           fontSize: size,
           fontWeight: (weight == 0) ? FontWeight.normal : FontWeight.bold,
-          color:c));
+          color: c));
 }
 
+Widget renderButton(BuildContext context, String name, {Function fn = null}) {
+  return ElevatedButton(
+    style: ElevatedButton.styleFrom(
+        primary: HexColor.fromHex("#313131"),
+        // background
+        onPrimary: Colors.white),
+    child: Text(name, style: primaryFont(primaryFontColour)),
+    onPressed: () {
+      fn();
+    },
+  );
+}
 
-
-void displayDialog(BuildContext context, String title, String content, {Function fn = null}) {
+void displayDialog(BuildContext context, String title, String content,
+    {Function fn = null}) {
   // set up the button
   Widget okButton = ElevatedButton(
     style: ElevatedButton.styleFrom(
-        primary: HexColor.fromHex(
-            "#313131"),
+        primary: HexColor.fromHex("#313131"),
         // background
         onPrimary: Colors.white),
     child: Text("OK", style: primaryFont(primaryFontColour, size: 15)),
@@ -55,8 +64,7 @@ void displayDialog(BuildContext context, String title, String content, {Function
 
   Widget cancelButton = ElevatedButton(
     style: ElevatedButton.styleFrom(
-        primary: HexColor.fromHex(
-            "#313131"),
+        primary: HexColor.fromHex("#313131"),
         // background
         onPrimary: Colors.white),
     child: Text("Cancel", style: primaryFont(primaryFontColour, size: 15)),
@@ -67,12 +75,10 @@ void displayDialog(BuildContext context, String title, String content, {Function
   // set up the AlertDialog
   AlertDialog alert = AlertDialog(
     backgroundColor: HexColor.fromHex("#121212"),
-    title: Text(title, style: primaryFont(primaryFontColour, size: 15, weight: 1)),
+    title:
+        Text(title, style: primaryFont(primaryFontColour, size: 15, weight: 1)),
     content: Text(content, style: primaryFont(primaryFontColour, size: 15)),
-    actions: [
-      okButton,
-      cancelButton
-    ],
+    actions: [okButton, cancelButton],
   );
 
   // show the dialog
