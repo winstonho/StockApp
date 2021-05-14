@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/Page/PdfView.dart';
 import 'package:flutter_app/Page/signup_page.dart';
 import 'package:flutter_app/Page/stockInfoprice_selection.dart';
 import 'package:flutter_app/Page/ProductSelect.dart';
@@ -45,7 +46,8 @@ class MyApp extends StatelessWidget {
         SignUpPage.route : (context) => SignUpPage(),
         CompanySelect.company : (context) => CompanySelect(),
         ProductInfoSelect.route : (context) => ProductInfoSelect(),
-        StockInfoPriceSelect.route : (context) => StockInfoPriceSelect()
+        StockInfoPriceSelect.route : (context) => StockInfoPriceSelect(),
+        PdfView.route : (context) => PdfView()
         //GamePage.route: (context) => GameStartPage(),
         //'/signup'     : (context) => new SignupPage()
       },
