@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_app/widgets/constant.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
@@ -28,8 +29,8 @@ class MyAppState extends State<PdfView> with SingleTickerProviderStateMixin {
 
   final SignatureController _controller = SignatureController(
     penStrokeWidth: 1,
-    penColor: Colors.red,
-    exportBackgroundColor: Colors.blue,
+    penColor: Colors.black,
+    exportBackgroundColor: Colors.transparent,
     onDrawStart: () => print('onDrawStart called!'),
     onDrawEnd: () => print('onDrawEnd called!'),
   );
@@ -126,7 +127,7 @@ class MyAppState extends State<PdfView> with SingleTickerProviderStateMixin {
           Signature(
             controller: _controller,
             height: 300,
-            backgroundColor: Colors.lightBlueAccent,
+            backgroundColor: backgroundColor,
           ),
           //OK AND CLEAR BUTTONS
           Container(
@@ -144,6 +145,15 @@ class MyAppState extends State<PdfView> with SingleTickerProviderStateMixin {
                       final  data =
                       await _controller.toPngBytes();
                       if (data != null) {
+
+
+                        //final appDocDir = await getApplicationDocumentsDirectory();
+                        //final appDocPath = appDocDir.path;
+                       // final file = File(appDocPath + '/' + 'filename.png');
+                        //print('Save as file ${file.path} ...');
+                        //await file.writeAsBytesSync(data.buffer.asInt8List());
+                        //await OpenFile.open(file.path);
+
                         await Navigator.of(context).push(
                           MaterialPageRoute<void>(
                             builder: (BuildContext context) {
@@ -151,7 +161,7 @@ class MyAppState extends State<PdfView> with SingleTickerProviderStateMixin {
                                 appBar: AppBar(),
                                 body: Center(
                                   child: Container(
-                                    color: Colors.grey[300],
+                                    color: backgroundColor,
                                     child: Image.memory(data),
                                   ),
                                 ),

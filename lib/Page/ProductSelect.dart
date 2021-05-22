@@ -7,6 +7,7 @@ import 'package:flutter_app/Util/Random.dart';
 import 'package:flutter_app/model/ProductInfo.dart';
 import 'package:flutter_app/model/Route/ScreenArguments.dart';
 import 'package:flutter_app/model/StockInfo.dart';
+import 'package:flutter_app/widgets/WithdrawForm.dart';
 import 'package:flutter_app/widgets/constant.dart';
 
 import 'package:intl/intl.dart';
@@ -164,7 +165,10 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                       label: Text("Withdraw",
                           style: primaryFont(primaryFontColour)),
                       icon: Icon(Icons.remove,
-                          color: primaryFontColour, size: 13)),
+                          color: primaryFontColour, size: 13),
+                      onPressed: () {
+                        WithdrawForm1(productID, context);
+                      }),
                   renderButton(context, "Back", fn: () {
                     Navigator.pop(context);
                   }),
@@ -391,6 +395,14 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
         ),
       ),
     );
+  }
+
+  Future<void> WithdrawForm1(String info, BuildContext context) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return WithdrawForm(info: info);
+        });
   }
 
   Future<void> AddForm(String productID, BuildContext context) {
