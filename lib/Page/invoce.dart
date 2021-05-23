@@ -1,14 +1,28 @@
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_app/model/StockInfo.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 
 Future<Uint8List> generateInvoice(
-    PdfPageFormat pageFormat) async {
+    PdfPageFormat pageFormat,StockInfo stockInfo,WithdrawInfo withdrawInfo) async {
   final lorem = pw.LoremText();
+
+
+  var temp = withdrawInfo.signature.split(',');
+  Uint8List temp1 = Uint8List(temp.length);
+  for(int i = 0; i< temp.length; i++)
+  {
+    if(i == 0)
+      temp1[i] = int.parse(temp[i].substring(1));
+    else if(i == temp.length -1)
+      temp1[i] = int.parse(temp[i].substring(0,temp[i].length-1));
+    else
+      temp1[i] = int.parse(temp[i]);
+  }
 
   final products = <Product>[
     Product('19874', lorem.sentence(4), 3.99, 2),
@@ -16,13 +30,14 @@ Future<Uint8List> generateInvoice(
   ];
 
   final invoice = Invoice(
-    invoiceNumber: '982347',
+    invoiceNumber: stockInfo.id,
     products: products,
-    paymentInfo:
-    '4509 Wiseman Street\nKnoxville, Tennessee(TN), 37929\n865-372-0425',
     tax: .15,
     baseColor: PdfColors.teal,
     accentColor: PdfColors.blueGrey900,
+    image: temp1,
+    sInfo: stockInfo,
+    wInfo: withdrawInfo
   );
 
   return await invoice.buildPdf(pageFormat);
@@ -33,17 +48,21 @@ class Invoice {
      this.products,
      this.invoiceNumber,
      this.tax,
-     this.paymentInfo,
      this.baseColor,
      this.accentColor,
+     this.image,
+     this.wInfo,
+     this.sInfo
   });
 
   final List<Product> products;
   final String invoiceNumber;
   final double tax;
-  final String paymentInfo;
+  final Uint8List image;
   final PdfColor baseColor;
   final PdfColor accentColor;
+  final StockInfo sInfo;
+  final WithdrawInfo wInfo;
 
   static const _darkColor = PdfColors.blueGrey800;
   static const _lightColor = PdfColors.white;
@@ -64,7 +83,9 @@ class Invoice {
   Future<Uint8List> buildPdf(PdfPageFormat pageFormat) async {
     // Create a PDF document.
     final doc = pw.Document();
-
+    print("test");
+    final signImage = pw.MemoryImage(image);
+    print("hello");
     final font1 = await rootBundle.load('assets/Montserrat-Regular.ttf');
     final font2 = await rootBundle.load('assets/Montserrat-Regular.ttf');
     final font3 = await rootBundle.load('assets/Montserrat-Regular.ttf');
@@ -87,7 +108,7 @@ class Invoice {
           _contentHeader(context),
           _contentTable(context),
           pw.SizedBox(height: 20),
-          _contentFooter(context),
+          _contentFooter(context,signImage),
           pw.SizedBox(height: 20),
           _termsAndConditions(context),
         ],
@@ -129,11 +150,11 @@ class Invoice {
                     padding: const pw.EdgeInsets.only(
                         left: 40, top: 10, bottom: 10, right: 20),
                     alignment: pw.Alignment.centerLeft,
-                    height: 50,
+                    height: 100,
                     child: pw.DefaultTextStyle(
                       style: pw.TextStyle(
                         color: _accentTextColor,
-                        fontSize: 12,
+                        fontSize: 11,
                       ),
                       child: pw.GridView(
                         crossAxisCount: 2,
@@ -141,7 +162,11 @@ class Invoice {
                           pw.Text('Invoice #',style: pw.TextStyle(color: PdfColor.fromInt(0xFFFFFFFF))),
                           pw.Text(invoiceNumber,style: pw.TextStyle(color: PdfColor.fromInt(0xFFFFFFFF))),
                           pw.Text('Date:',style: pw.TextStyle(color: PdfColor.fromInt(0xFFFFFFFF))),
-                          pw.Text(_formatDate(DateTime.now()),style: pw.TextStyle(color: PdfColor.fromInt(0xFFFFFFFF))),
+                          pw.Text(_formatDate(sInfo.stockDate),style: pw.TextStyle(color: PdfColor.fromInt(0xFFFFFFFF))),
+                          pw.Text('Draw By:',style: pw.TextStyle(color: PdfColor.fromInt(0xFFFFFFFF))),
+                          pw.Text(wInfo.drawBy,style: pw.TextStyle(color: PdfColor.fromInt(0xFFFFFFFF))),
+                          pw.Text('Received By:',style: pw.TextStyle(color: PdfColor.fromInt(0xFFFFFFFF))),
+                          pw.Text(wInfo.received,style: pw.TextStyle(color: PdfColor.fromInt(0xFFFFFFFF))),
                         ],
                       ),
                     ),
@@ -217,7 +242,7 @@ class Invoice {
     );
   }
 
-  pw.Widget _contentFooter(pw.Context context) {
+  pw.Widget _contentFooter(pw.Context context , image) {
     return pw.Row(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
@@ -236,21 +261,14 @@ class Invoice {
               pw.Container(
                 margin: const pw.EdgeInsets.only(top: 20, bottom: 8),
                 child: pw.Text(
-                  'Payment Info:',
+                  'Signature',
                   style: pw.TextStyle(
                     color: baseColor,
                     fontWeight: pw.FontWeight.bold,
                   ),
                 ),
               ),
-              pw.Text(
-                paymentInfo,
-                style: const pw.TextStyle(
-                  fontSize: 8,
-                  lineSpacing: 5,
-                  color: _darkColor,
-                ),
-              ),
+              pw.Image(image,height: 100,width: 100),
             ],
           ),
         ),

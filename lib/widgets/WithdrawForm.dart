@@ -1,9 +1,11 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_app/Page/PdfView.dart';
 import 'package:flutter_app/model/ProductInfo.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/model/StockInfo.dart';
 
 
 import 'package:flutter_app/widgets/constant.dart';
@@ -20,6 +22,7 @@ import 'package:intl/intl.dart';
 
 import 'package:money2/money2.dart';
 import 'package:signature/signature.dart';
+import 'package:uuid/uuid.dart';
 
 
 
@@ -275,6 +278,28 @@ Widget testIconCheck()
     );
   }
 
+  Future<void> pdfView(BuildContext context) async {
+
+    print("testing");
+    StockInfo sInfo = StockInfo(id: Uuid().v4());
+    WithdrawInfo wInfo = WithdrawInfo(id: sInfo.id);
+    sInfo.quantity = this.quantity;
+    //sinfo.balance = this.price;
+    sInfo.stockDate = this.selectedDate;
+    sInfo.remake = this.remarks.text;
+    var temp = await _controller.toPngBytes();
+    wInfo.signature = temp.toString();
+    wInfo.received = this.received.text;
+    wInfo.drawBy = this.drawBy.text;
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return PdfView(sInfo: sInfo,wInfo: wInfo,);
+        });
+  }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -365,7 +390,7 @@ Widget testIconCheck()
         ),
         actions: <Widget>
         [
-            TextButton(onPressed: (){print(this.received.text);print(this.drawBy.text);print(this.remarks.text);}, child: Text("testing"))
+            TextButton(onPressed: (){pdfView(context);}, child: Text("PdfPreview"))
         ],
       ),
     );

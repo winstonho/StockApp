@@ -47,3 +47,32 @@ class StockInfo
     action = json['action'];
   }
 }
+
+
+class WithdrawInfo
+{
+  String id;
+  String received = "";
+  String drawBy = "";
+  String signature = "";
+
+
+  WithdrawInfo({this.id});
+
+
+
+  Map<String, dynamic> toJson() =>
+      {
+        'id'          : id,
+        'drawBy'    : drawBy,
+        'received'    : received,
+        'signature' : signature,
+      };
+
+  void fromJson ( Map<String, dynamic> json) {
+    id = json['id'] as String;
+    received = json['received'] as String;
+    drawBy = json['drawBy'] as String;
+    signature = json['signature'] as String;
+  }
+}
