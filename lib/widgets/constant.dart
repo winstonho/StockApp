@@ -34,6 +34,21 @@ TextStyle primaryFont(Color c, {double size = 15, int weight = 0}) {
           color: c));
 }
 
+InputDecoration formDecoration(String hintText)
+{
+  return InputDecoration(
+    contentPadding: EdgeInsets.symmetric(vertical: 15),
+    hintText: hintText,
+    hintStyle: primaryFont(primaryFontColour, size: 13, weight: 0),
+    focusedBorder: UnderlineInputBorder(
+      borderSide: BorderSide(
+          color: HexColor.fromHex("#979798"), width: 2.0),
+    ),
+    errorStyle: TextStyle(fontSize: 0),
+  );
+
+
+}
 Widget renderButton(BuildContext context, String name, {Function fn = null}) {
   return ElevatedButton(
     style: ElevatedButton.styleFrom(

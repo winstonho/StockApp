@@ -219,7 +219,7 @@ Widget testIconCheck()
   Widget inputTotalPrice(BuildContext context) {
     final sgd = Currency.create('SGD', 2);
     final unitPrice = sgd.parse(r'$10.25');
-
+    print("Quantity is: "  + quantity.toString());
     return Container(
       height: 50,
       child: Card(
@@ -376,8 +376,8 @@ Widget testIconCheck()
                 Divider(
                   color: HexColor.fromHex("#979798"),
                 ),
-                inputText("DrawBy :", this.drawBy,1, context),
-                inputText("received by :", this.received,1, context),
+                inputText("Withdrawn by:", this.drawBy,1, context),
+                inputText("Received by :", this.received,1, context),
                 Divider(
                   color: HexColor.fromHex("#979798"),
                 ),

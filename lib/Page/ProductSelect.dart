@@ -8,6 +8,7 @@ import 'package:flutter_app/model/ProductInfo.dart';
 import 'package:flutter_app/model/Route/ScreenArguments.dart';
 import 'package:flutter_app/model/StockInfo.dart';
 import 'package:flutter_app/widgets/WithdrawForm.dart';
+import 'package:flutter_app/widgets/AddForm.dart';
 import 'package:flutter_app/widgets/constant.dart';
 
 import 'package:intl/intl.dart';
@@ -33,6 +34,12 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
   bool isSort = true;
   ProductInfo productInfo;
 
+  DateTime selectedDate = DateTime.now();
+  int quantity = 0;
+  TextStyle style_ = primaryFont(primaryFontColour, size: 13, weight: 0);
+  String price;
+  String remarks;
+
   /************************* Stock Stuff ************************************/
 
   List<StockInfo> stockList;
@@ -49,11 +56,12 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
   }
 
   getStockRows() {
+    DateFormat df = DateFormat("dd MMMM yyyy");
     print(stockList[0].remake);
     final rows = List.generate(
         stockList.length,
         (int index) => new DataRow(selected: false, cells: [
-              makeStockCell(stockList[index].stockDate.toString()),
+              makeStockCell(df.format(stockList[index].stockDate).toString()),
               (stockList[index].action)
                   ? makeStockCell(stockList[index].quantity.toString())
                   : makeStockCell(""),
@@ -125,7 +133,6 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
     return showDialog(
         context: context,
         builder: (context) {
-          DateFormat df = DateFormat("dd MMMM yyyy");
           String contentText = "Content of Dialog";
           return StatefulBuilder(
             builder: (context, setState) {
@@ -155,7 +162,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                       label: Text("Add", style: primaryFont(primaryFontColour)),
                       icon: Icon(Icons.add, color: primaryFontColour, size: 13),
                       onPressed: () {
-                        AddForm(productID, context);
+                        AddForm1(productID, context);
                       }),
                   ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
@@ -284,23 +291,33 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  DateTime selectedDate = DateTime.now();
-  int quantity = 0;
-  TextStyle style_ = primaryFont(primaryFontColour, size: 13, weight: 0);
-  String price;
-  String remarks;
+
 
   Widget inputRemarks(BuildContext context) {
-    return Card(
-      color: HexColor.fromHex("#292929"),
-      child: TextFormField(
-        style: style_,
-        maxLines: null,
-        decoration: InputDecoration(
-          isDense: true,
-          contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-          hintText: 'Remarks:',
-          hintStyle: style_,
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        width: 600,
+        child: Card(
+          color: HexColor.fromHex("#292929"),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextFormField(
+              style: style_,
+              minLines: 1,
+              maxLines: 3,
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(256),
+              ],
+              decoration: InputDecoration(
+                isDense: true,
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                hintText: 'Remarks:',
+                hintStyle: style_,
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -318,9 +335,11 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
               Icon(Icons.attach_money,
                   color: HexColor.fromHex("#979798"), size: 15),
               SizedBox(width: 20),
-              Expanded(
+              SizedBox(
+                width: 500,
                 child: TextFormField(
                   style: style_,
+                  inputFormatters: [LengthLimitingTextInputFormatter(10)],
                   decoration: InputDecoration(
                     contentPadding: EdgeInsets.symmetric(vertical: 15),
                     hintText: 'Unit Price',
@@ -336,22 +355,20 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
   }
 
   Widget inputTotalPrice(BuildContext context) {
+    print("Quantity: " + quantity.toString());
     final sgd = Currency.create('SGD', 2);
     final unitPrice = sgd.parse(r'$10.25');
 
     return Container(
       height: 50,
-      child: Card(
-        color: HexColor.fromHex("#292929"),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: <Widget>[
-              Text("Total Price:", style: style_),
-              Spacer(),
-              Text((unitPrice * quantity).toString(), style: style_)
-            ],
-          ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: <Widget>[
+            Text("Total Price:", style: style_),
+            Spacer(),
+            Text((unitPrice * quantity).toString(), style: style_)
+          ],
         ),
       ),
     );
@@ -369,12 +386,14 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
               Icon(Icons.account_balance,
                   color: HexColor.fromHex("#979798"), size: 15),
               SizedBox(width: 20),
-              Expanded(
+              SizedBox(
+                width: 500,
                 child: TextFormField(
                   style: style_,
                   keyboardType: TextInputType.number,
                   inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.digitsOnly
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(10),
                   ],
                   // Only numbers can be entered
                   decoration: InputDecoration(
@@ -386,6 +405,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                   onChanged: (value) {
                     setState(() {
                       quantity = int.parse(value);
+                      print("Quantity is: " + quantity.toString());
                     });
                   },
                 ),
@@ -405,89 +425,14 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
         });
   }
 
-  Future<void> AddForm(String productID, BuildContext context) {
+  Future<void> AddForm1(String info, BuildContext context) {
     return showDialog(
         context: context,
         builder: (context) {
-          DateFormat df = DateFormat("dd MMMM yyyy");
-          String contentText = "Add " + productID;
-          return StatefulBuilder(
-            builder: (context, setState) {
-              return Container(
-                width: 500,
-                height: 300,
-                child: AlertDialog(
-                  insetPadding: EdgeInsets.symmetric(vertical: 50),
-                  backgroundColor: backgroundColor,
-                  title: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(width: 2, color: primaryFontColour),
-                        borderRadius: BorderRadius.all(Radius.circular(
-                                5.0) //                 <--- border radius here
-                            ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(contentText,
-                            style: primaryFont(primaryFontColour,
-                                size: 13, weight: 1)),
-                      )),
-                  content: Column(
-                    children: [
-                      Card(
-                        color: HexColor.fromHex("#292929"),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: <Widget>[
-                              Icon(Icons.calendar_today,
-                                  color: HexColor.fromHex("#979798"), size: 15),
-                              SizedBox(width: 20),
-                              TextButton(
-                                  onPressed: () async {
-                                    final DateTime picked =
-                                        await showDatePicker(
-                                            context: context,
-                                            initialDate: selectedDate,
-                                            firstDate: DateTime(2015, 8),
-                                            lastDate: DateTime(2101));
-                                    if (picked != null &&
-                                        picked != selectedDate)
-                                      setState(() {
-                                        selectedDate = picked;
-                                        print("selectedDate is: " +
-                                            selectedDate.toString());
-                                      });
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(right: 40.0),
-                                    child: Text(
-                                        df.format(selectedDate).toString(),
-                                        style: primaryFont(
-                                            HexColor.fromHex("#979798"),
-                                            size: 13,
-                                            weight: 0)),
-                                  ))
-                            ],
-                          ),
-                        ),
-                      ),
-                      inputQuantity(context),
-                      inputPrice(context),
-                      Divider(
-                        color: HexColor.fromHex("#979798"),
-                      ),
-                      inputTotalPrice(context),
-                      inputRemarks(context),
-                    ],
-                  ),
-                  actions: <Widget>[],
-                ),
-              );
-            },
-          );
+          return AddForm(info: info);
         });
   }
+
 
   @override
   Widget build(BuildContext context) {
