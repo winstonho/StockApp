@@ -30,13 +30,11 @@ class _AddFormState extends State<AddForm> {
   TextEditingController received = TextEditingController();
   String unitPrice = '0.00';
   bool priceValid = true;
+  bool quantityValid = true;
   Money unitPrice_m;
+  String newString = r'10.25';
 
-
-  Future addNewStock() async
-  {
-
-    print("enter");
+  Future addNewStock() async {
     StockInfo info = StockInfo();
     info.id = Uuid().v4();
     info.productID = widget.info;
@@ -45,6 +43,8 @@ class _AddFormState extends State<AddForm> {
     info.quantity = quantity;
     info.remake = remarks.text;
     info.action = true;
+    info.unitPrice = unitPrice;
+    Navigator.pop(context);
     //info.unitPrice = test.toString();
     //Money test = Money.fromInt(1000, Currency.create('USD', 2));
     //print(test.toString());
@@ -53,9 +53,7 @@ class _AddFormState extends State<AddForm> {
     //info.unitPrice = ;
 
     await DatabaseService().addStock(info);
-    print("testing");
   }
-
 
   Widget inputText(String label, TextEditingController value, int maxLine,
       BuildContext context) {
@@ -97,7 +95,7 @@ class _AddFormState extends State<AddForm> {
 
   Widget inputPrice(BuildContext context) {
     return Container(
-      height: 50,
+      height: 65,
       child: Card(
         color: HexColor.fromHex("#292929"),
         child: Padding(
@@ -111,16 +109,19 @@ class _AddFormState extends State<AddForm> {
                 child: TextFormField(
                   style: style_,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: (value) {
+                    if (!RegExp(r'[0-9]+.[0-9][0-9]$').hasMatch(value))
+                      return 'Invalid formatting';
+                  },
                   onChanged: (value) {
-                    if (!RegExp(r'[0-9]+.[0-9][0-9]$').hasMatch(value)) {
-                      setState(() {
-                        unitPrice = value;
+                    setState(() {
+                      if (!RegExp(r'[0-9]+.[0-9][0-9]$').hasMatch(value)) {
+                        priceValid = false;
+                      } else {
                         priceValid = true;
-                      });
-                    } else {
-                      priceValid = false;
-                    }
-                    ;
+                        unitPrice = value;
+                      }
+                    });
                   },
                   decoration: formDecoration('Unit Price'),
                   initialValue: '0.00',
@@ -135,14 +136,10 @@ class _AddFormState extends State<AddForm> {
 
   Widget inputTotalPrice(BuildContext context) {
     final sgd = Currency.create('SGD', 2);
-    String p = unitPrice;
-    String newString = r'$' + p;
 
-    if(priceValid) {
-      print("Price valid is: " + priceValid.toString());
-      unitPrice_m = sgd.parse(newString);
+    if (priceValid) {
+      unitPrice_m = sgd.parse(r'$' + unitPrice);
     }
-
     return Container(
       height: 50,
       child: Padding(
@@ -160,7 +157,7 @@ class _AddFormState extends State<AddForm> {
 
   Widget inputQuantity(BuildContext context) {
     return Container(
-      height: 50,
+      height: 60,
       child: Card(
         color: HexColor.fromHex("#292929"),
         child: Padding(
@@ -179,9 +176,23 @@ class _AddFormState extends State<AddForm> {
                   ],
                   // Only numbers can be entered
                   decoration: formDecoration('Quantity'),
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: (value) {
+                    if (value == '' || int.parse(value) <= 0)
+                      return 'Please input a value more than 0';
+                  },
                   onChanged: (value) {
                     setState(() {
-                      quantity = int.parse(value);
+                      if (value == '')
+                        quantityValid = false;
+                      else {
+                        int v = int.parse(value);
+                        if (v > 0) {
+                          quantityValid = true;
+                          quantity = int.parse(value);
+                        } else
+                          quantityValid = false;
+                      }
                     });
                   },
                 ),
@@ -204,7 +215,7 @@ class _AddFormState extends State<AddForm> {
         content: Text("Are you sure you want to add the following stock?",
             style: primaryFont(primaryFontColour, size: 13, weight: 0)),
         actions: [
-          renderButton(context, "Confirm", fn: addNewStock),
+          renderButton(context, "Add", fn: addNewStock),
           renderButton(context, "Cancel", fn: () {
             Navigator.pop(context);
           })
@@ -292,16 +303,18 @@ class _AddFormState extends State<AddForm> {
             ),
           ),
           actions: [
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  primary: HexColor.fromHex("#313131"),
-                  // background
-                  onPrimary: Colors.white),
-              child: Text("Add", style: primaryFont(primaryFontColour)),
-              onPressed: () {
-                confirmAddStock(context);
-              },
-            ),
+            (priceValid && quantityValid)
+                ? ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        primary: HexColor.fromHex("#313131"),
+                        // background
+                        onPrimary: Colors.white),
+                    child: Text("Add", style: primaryFont(primaryFontColour)),
+                    onPressed: () {
+                      confirmAddStock(context);
+                    },
+                  )
+                : Text("Add", style: primaryFont(primaryFontColour)),
             renderButton(context, "Back", fn: () {
               Navigator.pop(context);
             }),

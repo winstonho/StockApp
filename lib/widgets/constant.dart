@@ -44,7 +44,7 @@ InputDecoration formDecoration(String hintText)
       borderSide: BorderSide(
           color: HexColor.fromHex("#979798"), width: 2.0),
     ),
-    errorStyle: TextStyle(fontSize: 0),
+    errorStyle: TextStyle(fontSize: 8),
   );
 
 
