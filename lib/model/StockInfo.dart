@@ -8,8 +8,8 @@ class StockInfo
   String remake  = "null";
   int  quantity  = 0;
   int balance = 0;
-  double unitPrice   = 0;
-  double totalPrice    = 0;
+  String unitPrice   = "0.00";
+  String totalPrice    = "0.00";
   DateTime stockDate =  new DateTime.now();
 
 

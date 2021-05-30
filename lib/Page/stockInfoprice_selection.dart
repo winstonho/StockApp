@@ -34,7 +34,7 @@ class _ProductInfoSelectSelectState extends State<StockInfoPriceSelect> {
     info.stockDate = DateTime.now();
     info.balance = Random.secure().nextInt(10);
     info.quantity = Random.secure().nextInt(10);
-    info.unitPrice = Random.secure().nextDouble() * 100;
+   // info.unitPrice = Random.secure().nextDouble() * 100;
     await DatabaseService().addStock(info);
     print("testing");
   }

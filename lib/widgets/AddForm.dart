@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/Service/DatabaseService.dart';
+import 'package:flutter_app/model/StockInfo.dart';
 
 import 'package:flutter_app/widgets/constant.dart';
 import 'package:intl/intl.dart';
 
 import 'package:money2/money2.dart';
+import 'package:uuid/uuid.dart';
 
 class AddForm extends StatefulWidget {
   final String info;
@@ -28,6 +31,31 @@ class _AddFormState extends State<AddForm> {
   String unitPrice = '0.00';
   bool priceValid = true;
   Money unitPrice_m;
+
+
+  Future addNewStock() async
+  {
+
+    print("enter");
+    StockInfo info = StockInfo();
+    info.id = Uuid().v4();
+    info.productID = widget.info;
+    info.stockDate = selectedDate;
+    info.balance = quantity;
+    info.quantity = quantity;
+    info.remake = remarks.text;
+    info.action = true;
+    //info.unitPrice = test.toString();
+    //Money test = Money.fromInt(1000, Currency.create('USD', 2));
+    //print(test.toString());
+    //Money test1 = Money.parse(test.toString(), Currency.create('USD', 2));
+    //print(test1.toString());
+    //info.unitPrice = ;
+
+    await DatabaseService().addStock(info);
+    print("testing");
+  }
+
 
   Widget inputText(String label, TextEditingController value, int maxLine,
       BuildContext context) {
@@ -176,7 +204,7 @@ class _AddFormState extends State<AddForm> {
         content: Text("Are you sure you want to add the following stock?",
             style: primaryFont(primaryFontColour, size: 13, weight: 0)),
         actions: [
-          renderButton(context, "Confirm", fn: null),
+          renderButton(context, "Confirm", fn: addNewStock),
           renderButton(context, "Cancel", fn: () {
             Navigator.pop(context);
           })
