@@ -45,6 +45,7 @@ class _AddFormState extends State<AddForm> {
     info.action = true;
     info.unitPrice = unitPrice;
     Navigator.pop(context);
+    Navigator.pop(context);
     //info.unitPrice = test.toString();
     //Money test = Money.fromInt(1000, Currency.create('USD', 2));
     //print(test.toString());
