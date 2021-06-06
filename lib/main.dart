@@ -6,6 +6,7 @@ import 'package:flutter_app/Page/stockInfoprice_selection.dart';
 import 'package:flutter_app/Page/ProductSelect.dart';
 import 'package:flutter_app/Page/CompanySelect.dart';
 import 'package:flutter_app/Page/Login.dart';
+import 'package:flutter_app/model/MasterData.dart';
 import 'package:flutter_app/widgets/constant.dart';
 
 
@@ -27,6 +28,7 @@ void main() async{
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
 
   @override
   Widget build(BuildContext context) {

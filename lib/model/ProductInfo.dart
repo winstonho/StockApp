@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 class ProductInfo
 {
   String id;
+  bool change = false;
   String company = "gg";
   int  totalQuantity  = 10;
   double totalPrice  = 0;
@@ -29,6 +30,7 @@ class ProductInfo
         'totalPrice' : totalPrice,
         'productName'  : productName,
         'avgPrice'  : avgPrice,
+        'change' : change
       };
 
   void fromJson ( Map<String, dynamic> json) {
@@ -36,6 +38,7 @@ class ProductInfo
     company = json['company'] as String;
     productName = json['productName'] as String;
     totalQuantity = json['totalQuantity'] as int;
+    change = json['change'];
     totalPrice = json['totalPrice'];
     avgPrice = json['avgPrice'];
     productDate = DateTime.parse(json['productDate']);

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/Page/StockView.dart';
 
 import 'package:flutter_app/Service/DatabaseService.dart';
 import 'package:flutter_app/Util/Random.dart';
+import 'package:flutter_app/model/CompanyInfo.dart';
 import 'package:flutter_app/model/ProductInfo.dart';
 import 'package:flutter_app/model/Route/ScreenArguments.dart';
 import 'package:flutter_app/model/StockInfo.dart';
@@ -115,7 +117,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                 ),
                 DataColumn(
                   label: Text("Unit Price"),
-                  numeric: true,
+                  numeric: false,
                 ),
                 DataColumn(
                   label: Text("Total"),
@@ -129,7 +131,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
         });
   }
 
-  Future<void> viewStockRecord(String productID) {
+  Future<void> viewStockRecord(ProductInfo productID) {
     return showDialog(
         context: context,
         builder: (context) {
@@ -152,7 +154,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                             size: 20, weight: 1)),
                   ),
                 ),
-                content: generateStockTable(productID),
+                content: StockView(productID),
                 actions: <Widget>[
                   ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
@@ -174,7 +176,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                       icon: Icon(Icons.remove,
                           color: primaryFontColour, size: 13),
                       onPressed: () {
-                        WithdrawForm1(productID, context);
+                        WithdrawForm1(productID.id, context);
                       }),
                   renderButton(context, "Back", fn: () {
                     Navigator.pop(context);
@@ -206,7 +208,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                 IconButton(
                     splashRadius: 15,
                     onPressed: () {
-                      viewStockRecord(list[index].id.toString());
+                      viewStockRecord(list[index]);
                     },
                     icon: Icon(Icons.my_library_add_outlined),
                     iconSize: 15,
@@ -289,133 +291,12 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
         });
   }
 
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
 
 
-  Widget inputRemarks(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Container(
-        width: 600,
-        child: Card(
-          color: HexColor.fromHex("#292929"),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextFormField(
-              style: style_,
-              minLines: 1,
-              maxLines: 3,
-              inputFormatters: [
-                LengthLimitingTextInputFormatter(256),
-              ],
-              decoration: InputDecoration(
-                isDense: true,
-                contentPadding:
-                    EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-                hintText: 'Remarks:',
-                hintStyle: style_,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
-  Widget inputPrice(BuildContext context) {
-    return Container(
-      height: 50,
-      child: Card(
-        color: HexColor.fromHex("#292929"),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: <Widget>[
-              Icon(Icons.attach_money,
-                  color: HexColor.fromHex("#979798"), size: 15),
-              SizedBox(width: 20),
-              SizedBox(
-                width: 500,
-                child: TextFormField(
-                  style: style_,
-                  inputFormatters: [LengthLimitingTextInputFormatter(10)],
-                  decoration: InputDecoration(
-                    contentPadding: EdgeInsets.symmetric(vertical: 15),
-                    hintText: 'Unit Price',
-                    hintStyle: style_,
-                  ),
-                ),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
-  Widget inputTotalPrice(BuildContext context) {
-    print("Quantity: " + quantity.toString());
-    final sgd = Currency.create('SGD', 2);
-    final unitPrice = sgd.parse(r'$10.25');
 
-    return Container(
-      height: 50,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          children: <Widget>[
-            Text("Total Price:", style: style_),
-            Spacer(),
-            Text((unitPrice * quantity).toString(), style: style_)
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget inputQuantity(BuildContext context) {
-    return Container(
-      height: 50,
-      child: Card(
-        color: HexColor.fromHex("#292929"),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: <Widget>[
-              Icon(Icons.account_balance,
-                  color: HexColor.fromHex("#979798"), size: 15),
-              SizedBox(width: 20),
-              SizedBox(
-                width: 500,
-                child: TextFormField(
-                  style: style_,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(10),
-                  ],
-                  // Only numbers can be entered
-                  decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 15),
-                      hintText: 'Quantity',
-                      hintStyle: style_,
-                      border: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.red))),
-                  onChanged: (value) {
-                    setState(() {
-                      quantity = int.parse(value);
-                      print("Quantity is: " + quantity.toString());
-                    });
-                  },
-                ),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   Future<void> WithdrawForm1(String info, BuildContext context) {
     return showDialog(
@@ -425,7 +306,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
         });
   }
 
-  Future<void> AddForm1(String info, BuildContext context) {
+  Future<void> AddForm1(ProductInfo info, BuildContext context) {
     return showDialog(
         context: context,
         builder: (context) {

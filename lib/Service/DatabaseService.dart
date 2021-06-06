@@ -17,6 +17,7 @@ class DatabaseService {
   final CollectionReference stockCollection = Firestore.instance.collection("stock");
 
   Future updateUserData(MyUser user) async {
+    stockCollection.stream.listen((event) {print("");});
     return await userCollection.document(user.uid).set(user.toJson());
   }
 
@@ -37,9 +38,7 @@ class DatabaseService {
   }
 
   List<CompanyInfo> _companyInfoFromSnapshot(List<Document> snapshot) {
-    print(snapshot);
     return snapshot.map((doc) {
-      print("testing124");
       CompanyInfo temp = CompanyInfo();
       temp.fromJson(doc.map);
       return temp;
@@ -81,6 +80,11 @@ class DatabaseService {
     return stockCollection.where("productID", isEqualTo: productID ).get().asStream().map(_stockInfoFromSnapshot);
   }
 
+  Future getProduct(String  id) async{
+    var temp =  await stockCollection.document(id).get();
+    if(temp != null)
+      return ProductInfo().fromJson(temp.map);
+  }
 
   Future addStock(StockInfo info) async{
     return await stockCollection.document(info.id).set(info.toJson());

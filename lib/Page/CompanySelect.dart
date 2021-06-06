@@ -6,6 +6,7 @@ import 'package:flutter_app/Service/AuthService.dart';
 import 'package:flutter_app/Service/DatabaseService.dart';
 import 'package:flutter_app/Util/Random.dart';
 import 'package:flutter_app/model/CompanyInfo.dart';
+import 'package:flutter_app/model/MasterData.dart';
 import 'package:flutter_app/model/Route/ScreenArguments.dart';
 import 'package:flutter_app/widgets/constant.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
@@ -36,7 +37,11 @@ class _CompanySelectState extends State<CompanySelect> {
   }
 
 
-
+  @override
+  void initState() {
+    MasterData.instance.init();
+    super.initState();
+  }
 
 
   @override

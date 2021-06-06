@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/Service/DatabaseService.dart';
+import 'package:flutter_app/model/MasterData.dart';
+import 'package:flutter_app/model/ProductInfo.dart';
 import 'package:flutter_app/model/StockInfo.dart';
 
 import 'package:flutter_app/widgets/constant.dart';
@@ -11,7 +13,7 @@ import 'package:money2/money2.dart';
 import 'package:uuid/uuid.dart';
 
 class AddForm extends StatefulWidget {
-  final String info;
+  final ProductInfo info;
 
   AddForm({this.info});
 
@@ -37,13 +39,21 @@ class _AddFormState extends State<AddForm> {
   Future addNewStock() async {
     StockInfo info = StockInfo();
     info.id = Uuid().v4();
-    info.productID = widget.info;
+    info.productID = widget.info.id;
     info.stockDate = selectedDate;
     info.balance = quantity;
     info.quantity = quantity;
     info.remake = remarks.text;
     info.action = true;
     info.unitPrice = unitPrice;
+
+    //Assume we get the latest data.
+    ProductInfo temp = await DatabaseService().getProduct(widget.info.id);
+
+
+    await DatabaseService().addProduct(widget.info);
+    await DatabaseService().addStock(info);
+    MasterData.instance.callSetState("stockUpdate");
     Navigator.pop(context);
     Navigator.pop(context);
     //info.unitPrice = test.toString();
@@ -53,7 +63,7 @@ class _AddFormState extends State<AddForm> {
     //print(test1.toString());
     //info.unitPrice = ;
 
-    await DatabaseService().addStock(info);
+
   }
 
   Widget inputText(String label, TextEditingController value, int maxLine,
@@ -233,7 +243,7 @@ class _AddFormState extends State<AddForm> {
   @override
   Widget build(BuildContext context) {
     DateFormat df = DateFormat("dd MMMM yyyy");
-    String contentText = "Add " + widget.info;
+    String contentText = "Add " + widget.info.id;
 
     return Container(
         width: 500,
