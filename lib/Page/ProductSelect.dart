@@ -51,8 +51,35 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
   Money avgPrice;
 
   //This updates the product's average price, total price and balance
-  Future updateProductData(
-      String id, Money newAvgPrice, int newBalance, Money newTotalPrice) async {
+  Future updateProductData(String id) async {
+    /******Calculate average price, balance and total quantity ****/
+    int newBalance = 0;
+    Money newTotalPrice = parseMoney("0.00");
+    Money newAvgPrice = parseMoney("0.00");
+    List<String> totalPrices = [];
+
+    for (int i = 0; i < stockList.length; ++i) {
+      if (stockList[i].action) {
+        newTotalPrice +=
+            parseMoney(stockList[i].unitPrice) * stockList[i].quantity;
+        newBalance += stockList[i].quantity;
+      } else {
+        newTotalPrice -=
+            parseMoney(stockList[i].unitPrice) * stockList[i].quantity;
+        newBalance -= stockList[i].quantity;
+      }
+
+      //Update average price
+      newAvgPrice = newTotalPrice / newBalance;
+      newAvgPrice = newTotalPrice / newBalance;
+      totalPrices.add(newTotalPrice.toString());
+    }
+
+    print("Total price is " + newTotalPrice.toString());
+    print("Balance is " + newBalance.toString());
+    print("Average Price is" + newAvgPrice.toString());
+
+ /*********Updates the product table **************/
     for (int i = 0; i < list.length; ++i) {
       if(id == list[i].id)
         {
@@ -77,31 +104,8 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
 
     List<String> totalPrices = [];
 
-    /******Calculate average price, balance and total quantity ****/
-    int currBalance = 0;
-    Money totalPrice = parseMoney("0.00");
-    Money averagePrice = parseMoney("0.00");
-    for (int i = 0; i < stockList.length; ++i) {
-      if (stockList[i].action) {
-        totalPrice +=
-            parseMoney(stockList[i].unitPrice) * stockList[i].quantity;
-        currBalance += stockList[i].quantity;
-      } else {
-        totalPrice -=
-            parseMoney(stockList[i].unitPrice) * stockList[i].quantity;
-        currBalance -= stockList[i].quantity;
-      }
 
-      //Update average price
-      averagePrice = totalPrice / currBalance;
-      totalPrices.add(totalPrice.toString());
-    }
-
-    print("Total price is " + totalPrice.toString());
-    print("Balance is " + currBalance.toString());
-    print("Average Price is" + averagePrice.toString());
-
-    updateProductData(id, averagePrice, currBalance, totalPrice);
+    updateProductData(id);
 
     final rows = List.generate(
         stockList.length,
