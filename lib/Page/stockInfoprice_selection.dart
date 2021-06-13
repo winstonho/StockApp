@@ -3,13 +3,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_app/Service/DatabaseService.dart';
-import 'package:flutter_app/Util/Random.dart';
-import 'package:flutter_app/model/CompanyInfo.dart';
 import 'package:flutter_app/model/ProductInfo.dart';
-import 'package:flutter_app/model/Route/ScreenArguments.dart';
 import 'package:flutter_app/model/StockInfo.dart';
 import 'package:flutter_app/widgets/constant.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:money2/money2.dart';
 import 'package:uuid/uuid.dart';
 
 class StockInfoPriceSelect extends StatefulWidget {
@@ -26,6 +24,7 @@ class _ProductInfoSelectSelectState extends State<StockInfoPriceSelect> {
   int columnIndex = 0;
   List<StockInfo> list;
   int selectedIndex = 0;
+  Money avgPrice;
   Future addNewStock() async
   {
     StockInfo info = StockInfo();
@@ -40,6 +39,7 @@ class _ProductInfoSelectSelectState extends State<StockInfoPriceSelect> {
   }
 
   List<DataRow> getRowsStock() {
+
     final rows2 = new List.generate(list.length, (int index) => new DataRow(
         onSelectChanged: (val) {
           setState(() {
@@ -52,7 +52,8 @@ class _ProductInfoSelectSelectState extends State<StockInfoPriceSelect> {
         cells: [
           new DataCell(new Text(list[index].stockDate.toString(), style: new TextStyle(color: Colors.white))),
           new DataCell(new Text(list[index].balance.toString(), style: new TextStyle(color: Colors.white))),
-          new DataCell(new Text(list[index].quantity.toString(), style: new TextStyle(color: Colors.white))),
+          new DataCell(new Text(avgPrice.toString(), style: new TextStyle(color: Colors.white))),
+
         ]));
     return rows2;
   }
@@ -158,6 +159,9 @@ class _ProductInfoSelectSelectState extends State<StockInfoPriceSelect> {
     final ProductInfo args =
     ModalRoute.of(context).settings.arguments as ProductInfo;
     productInfo = args;
+
+    final sgd = Currency.create('SGD', 2);
+    avgPrice = sgd.parse(r'$' + productInfo.totalPrice.toString()) / productInfo.totalQuantity;
 
     var size = MediaQuery.of(context).size;
     return Container(

@@ -36,6 +36,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
 
   DateTime selectedDate = DateTime.now();
   int quantity = 0;
+  int balance = 0;
   TextStyle style_ = primaryFont(primaryFontColour, size: 13, weight: 0);
   String price;
   String remarks;
@@ -47,17 +48,61 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
   bool isStockSort = true;
   int selectedStockIndex = 0;
   StockInfo stockInfo;
+  Money avgPrice;
+
+  //This updates the product's average price, total price and balance
+  Future updateProductData(
+      String id, Money newAvgPrice, int newBalance, Money newTotalPrice) async {
+    for (int i = 0; i < list.length; ++i) {
+      if(id == list[i].id)
+        {
+          ProductInfo newProduct = list[i];
+          newProduct.totalQuantity = newBalance;
+          newProduct.avgPrice = double.parse(newAvgPrice.toString().substring(1));
+          newProduct.totalPrice = double.parse(newTotalPrice.toString().substring(1));
+          await DatabaseService().addProduct(newProduct);
+        }
+    }
+  }
 
   DataCell makeStockCell(String value) {
     if (value == null) value = "-";
-
     return DataCell(
         Text(value, style: primaryFont(primaryFontColour, size: 15)));
   }
 
-  getStockRows() {
+  getStockRows(String id) {
     DateFormat df = DateFormat("dd MMMM yyyy");
     print(stockList[0].remake);
+
+    List<String> totalPrices = [];
+
+    /******Calculate average price, balance and total quantity ****/
+    int currBalance = 0;
+    Money totalPrice = parseMoney("0.00");
+    Money averagePrice = parseMoney("0.00");
+    for (int i = 0; i < stockList.length; ++i) {
+      if (stockList[i].action) {
+        totalPrice +=
+            parseMoney(stockList[i].unitPrice) * stockList[i].quantity;
+        currBalance += stockList[i].quantity;
+      } else {
+        totalPrice -=
+            parseMoney(stockList[i].unitPrice) * stockList[i].quantity;
+        currBalance -= stockList[i].quantity;
+      }
+
+      //Update average price
+      averagePrice = totalPrice / currBalance;
+      totalPrices.add(totalPrice.toString());
+    }
+
+    print("Total price is " + totalPrice.toString());
+    print("Balance is " + currBalance.toString());
+    print("Average Price is" + averagePrice.toString());
+
+    updateProductData(id, averagePrice, currBalance, totalPrice);
+
     final rows = List.generate(
         stockList.length,
         (int index) => new DataRow(selected: false, cells: [
@@ -70,7 +115,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                   : makeStockCell(stockList[index].quantity.toString()),
               makeStockCell(stockList[index].balance.toString()),
               makeStockCell(stockList[index].unitPrice.toString()),
-              makeStockCell(stockList[index].totalPrice.toString()),
+              makeStockCell(totalPrices[index]),
               (stockList[index].remake == null)
                   ? makeStockCell(stockList[index].remake)
                   : makeStockCell(""),
@@ -125,7 +170,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                   label: Text("Remarks"),
                 ),
               ],
-              rows: getStockRows());
+              rows: getStockRows(id));
         });
   }
 
@@ -133,7 +178,6 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
     return showDialog(
         context: context,
         builder: (context) {
-          String contentText = "Content of Dialog";
           return StatefulBuilder(
             builder: (context, setState) {
               return AlertDialog(
@@ -197,6 +241,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
   }
 
   getProductRows() {
+    final sgd = Currency.create('SGD', 2);
     final rows = List.generate(
         list.length,
         (int index) => new DataRow(selected: false, cells: [
@@ -216,7 +261,10 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                   style: primaryFont(primaryFontColour, size: 15))),
               DataCell(Text(list[index].totalQuantity.toString(),
                   style: primaryFont(primaryFontColour, size: 15))),
-              DataCell(Text(list[index].avgPrice.toString(),
+              DataCell(Text(
+                  (sgd.parse(r'$' + list[index].totalPrice.toString()) /
+                          list[index].totalQuantity)
+                      .toString(),
                   style: primaryFont(primaryFontColour, size: 15))),
             ]));
     return rows;
@@ -288,9 +336,6 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
           );
         });
   }
-
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
 
 
   Widget inputRemarks(BuildContext context) {
@@ -432,7 +477,6 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
           return AddForm(info: info);
         });
   }
-
 
   @override
   Widget build(BuildContext context) {

@@ -54,6 +54,7 @@ class _AddFormState extends State<AddForm> {
     //info.unitPrice = ;
 
     await DatabaseService().addStock(info);
+
   }
 
   Widget inputText(String label, TextEditingController value, int maxLine,
@@ -206,8 +207,6 @@ class _AddFormState extends State<AddForm> {
   }
 
   Widget confirmAddStock(BuildContext context) {
-    String formatText = "Date: " + selectedDate.toString() + "\n";
-
     AlertDialog dialog = AlertDialog(
         insetPadding: EdgeInsets.symmetric(vertical: 50),
         backgroundColor: backgroundColor,
