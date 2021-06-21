@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:money2/money2.dart';
 
 Color kPrimaryColor = Color(0xff202123);
 Color kTextColor = Color(0xff5477AB);
@@ -25,6 +26,12 @@ extension HexColor on Color {
 
 Color primaryFontColour = HexColor.fromHex("979798");
 Color backgroundColor = HexColor.fromHex("#212121");
+
+Money parseMoney(String val)
+{
+  final sgd = Currency.create('SGD', 2);
+  return sgd.parse(r'$' + val);
+}
 
 TextStyle primaryFont(Color c, {double size = 15, int weight = 0}) {
   return GoogleFonts.robotoCondensed(

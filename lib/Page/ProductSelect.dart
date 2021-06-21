@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app/Page/StockView.dart';
 
 import 'package:flutter_app/Service/DatabaseService.dart';
 import 'package:flutter_app/Util/Random.dart';
-import 'package:flutter_app/model/CompanyInfo.dart';
 import 'package:flutter_app/model/ProductInfo.dart';
 import 'package:flutter_app/model/Route/ScreenArguments.dart';
 import 'package:flutter_app/model/StockInfo.dart';
@@ -38,6 +36,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
 
   DateTime selectedDate = DateTime.now();
   int quantity = 0;
+  int balance = 0;
   TextStyle style_ = primaryFont(primaryFontColour, size: 13, weight: 0);
   String price;
   String remarks;
@@ -49,17 +48,65 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
   bool isStockSort = true;
   int selectedStockIndex = 0;
   StockInfo stockInfo;
+  Money avgPrice;
+
+  //This updates the product's average price, total price and balance
+  Future updateProductData(String id) async {
+    /******Calculate average price, balance and total quantity ****/
+    int newBalance = 0;
+    Money newTotalPrice = parseMoney("0.00");
+    Money newAvgPrice = parseMoney("0.00");
+    List<String> totalPrices = [];
+
+    for (int i = 0; i < stockList.length; ++i) {
+      if (stockList[i].action) {
+        newTotalPrice +=
+            parseMoney(stockList[i].unitPrice) * stockList[i].quantity;
+        newBalance += stockList[i].quantity;
+      } else {
+        newTotalPrice -=
+            parseMoney(stockList[i].unitPrice) * stockList[i].quantity;
+        newBalance -= stockList[i].quantity;
+      }
+
+      //Update average price
+      newAvgPrice = newTotalPrice / newBalance;
+      newAvgPrice = newTotalPrice / newBalance;
+      totalPrices.add(newTotalPrice.toString());
+    }
+
+    print("Total price is " + newTotalPrice.toString());
+    print("Balance is " + newBalance.toString());
+    print("Average Price is" + newAvgPrice.toString());
+
+ /*********Updates the product table **************/
+    for (int i = 0; i < list.length; ++i) {
+      if(id == list[i].id)
+        {
+          ProductInfo newProduct = list[i];
+          newProduct.totalQuantity = newBalance;
+          newProduct.avgPrice = double.parse(newAvgPrice.toString().substring(1));
+          newProduct.totalPrice = double.parse(newTotalPrice.toString().substring(1));
+          await DatabaseService().addProduct(newProduct);
+        }
+    }
+  }
 
   DataCell makeStockCell(String value) {
     if (value == null) value = "-";
-
     return DataCell(
         Text(value, style: primaryFont(primaryFontColour, size: 15)));
   }
 
-  getStockRows() {
+  getStockRows(String id) {
     DateFormat df = DateFormat("dd MMMM yyyy");
     print(stockList[0].remake);
+
+    List<String> totalPrices = [];
+
+
+    updateProductData(id);
+
     final rows = List.generate(
         stockList.length,
         (int index) => new DataRow(selected: false, cells: [
@@ -72,7 +119,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                   : makeStockCell(stockList[index].quantity.toString()),
               makeStockCell(stockList[index].balance.toString()),
               makeStockCell(stockList[index].unitPrice.toString()),
-              makeStockCell(stockList[index].totalPrice.toString()),
+              makeStockCell(totalPrices[index]),
               (stockList[index].remake == null)
                   ? makeStockCell(stockList[index].remake)
                   : makeStockCell(""),
@@ -117,7 +164,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                 ),
                 DataColumn(
                   label: Text("Unit Price"),
-                  numeric: false,
+                  numeric: true,
                 ),
                 DataColumn(
                   label: Text("Total"),
@@ -127,15 +174,14 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                   label: Text("Remarks"),
                 ),
               ],
-              rows: getStockRows());
+              rows: getStockRows(id));
         });
   }
 
-  Future<void> viewStockRecord(ProductInfo productID) {
+  Future<void> viewStockRecord(String productID) {
     return showDialog(
         context: context,
         builder: (context) {
-          String contentText = "Content of Dialog";
           return StatefulBuilder(
             builder: (context, setState) {
               return AlertDialog(
@@ -154,7 +200,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                             size: 20, weight: 1)),
                   ),
                 ),
-                content: StockView(productID),
+                content: generateStockTable(productID),
                 actions: <Widget>[
                   ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
@@ -176,7 +222,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                       icon: Icon(Icons.remove,
                           color: primaryFontColour, size: 13),
                       onPressed: () {
-                        WithdrawForm1(productID.id, context);
+                        WithdrawForm1(productID, context);
                       }),
                   renderButton(context, "Back", fn: () {
                     Navigator.pop(context);
@@ -199,6 +245,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
   }
 
   getProductRows() {
+    final sgd = Currency.create('SGD', 2);
     final rows = List.generate(
         list.length,
         (int index) => new DataRow(selected: false, cells: [
@@ -208,7 +255,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                 IconButton(
                     splashRadius: 15,
                     onPressed: () {
-                      viewStockRecord(list[index]);
+                      viewStockRecord(list[index].id.toString());
                     },
                     icon: Icon(Icons.my_library_add_outlined),
                     iconSize: 15,
@@ -218,7 +265,10 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                   style: primaryFont(primaryFontColour, size: 15))),
               DataCell(Text(list[index].totalQuantity.toString(),
                   style: primaryFont(primaryFontColour, size: 15))),
-              DataCell(Text(list[index].avgPrice.toString(),
+              DataCell(Text(
+                  (sgd.parse(r'$' + list[index].totalPrice.toString()) /
+                          list[index].totalQuantity)
+                      .toString(),
                   style: primaryFont(primaryFontColour, size: 15))),
             ]));
     return rows;
@@ -292,11 +342,129 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
   }
 
 
+  Widget inputRemarks(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        width: 600,
+        child: Card(
+          color: HexColor.fromHex("#292929"),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextFormField(
+              style: style_,
+              minLines: 1,
+              maxLines: 3,
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(256),
+              ],
+              decoration: InputDecoration(
+                isDense: true,
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                hintText: 'Remarks:',
+                hintStyle: style_,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
+  Widget inputPrice(BuildContext context) {
+    return Container(
+      height: 50,
+      child: Card(
+        color: HexColor.fromHex("#292929"),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: <Widget>[
+              Icon(Icons.attach_money,
+                  color: HexColor.fromHex("#979798"), size: 15),
+              SizedBox(width: 20),
+              SizedBox(
+                width: 500,
+                child: TextFormField(
+                  style: style_,
+                  inputFormatters: [LengthLimitingTextInputFormatter(10)],
+                  decoration: InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(vertical: 15),
+                    hintText: 'Unit Price',
+                    hintStyle: style_,
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
+  Widget inputTotalPrice(BuildContext context) {
+    print("Quantity: " + quantity.toString());
+    final sgd = Currency.create('SGD', 2);
+    final unitPrice = sgd.parse(r'$10.25');
 
+    return Container(
+      height: 50,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: <Widget>[
+            Text("Total Price:", style: style_),
+            Spacer(),
+            Text((unitPrice * quantity).toString(), style: style_)
+          ],
+        ),
+      ),
+    );
+  }
 
-
+  Widget inputQuantity(BuildContext context) {
+    return Container(
+      height: 50,
+      child: Card(
+        color: HexColor.fromHex("#292929"),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: <Widget>[
+              Icon(Icons.account_balance,
+                  color: HexColor.fromHex("#979798"), size: 15),
+              SizedBox(width: 20),
+              SizedBox(
+                width: 500,
+                child: TextFormField(
+                  style: style_,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(10),
+                  ],
+                  // Only numbers can be entered
+                  decoration: InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(vertical: 15),
+                      hintText: 'Quantity',
+                      hintStyle: style_,
+                      border: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.red))),
+                  onChanged: (value) {
+                    setState(() {
+                      quantity = int.parse(value);
+                      print("Quantity is: " + quantity.toString());
+                    });
+                  },
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   Future<void> WithdrawForm1(String info, BuildContext context) {
     return showDialog(
@@ -306,14 +474,13 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
         });
   }
 
-  Future<void> AddForm1(ProductInfo info, BuildContext context) {
+  Future<void> AddForm1(String info, BuildContext context) {
     return showDialog(
         context: context,
         builder: (context) {
           return AddForm(info: info);
         });
   }
-
 
   @override
   Widget build(BuildContext context) {
