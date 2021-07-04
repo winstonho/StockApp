@@ -46,13 +46,16 @@ class _AddFormState extends State<AddForm> {
     info.remake = remarks.text;
     info.action = true;
     info.unitPrice = unitPrice;
-
+    print("testing");
+    print(widget.info.id);
     //Assume we get the latest data.
     ProductInfo temp = await DatabaseService().getProduct(widget.info.id);
 
 
-    await DatabaseService().addProduct(widget.info);
+    //await DatabaseService().addProduct(widget.info);
+    print("testing");
     await DatabaseService().addStock(info);
+
     MasterData.instance.callSetState("stockUpdate");
     Navigator.pop(context);
     Navigator.pop(context);
@@ -64,7 +67,7 @@ class _AddFormState extends State<AddForm> {
     //info.unitPrice = ;
 
 
-    await DatabaseService().addStock(info);
+    //await DatabaseService().addStock(info);
 
   }
 

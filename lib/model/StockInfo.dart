@@ -15,6 +15,22 @@ class StockInfo
 
   StockInfo({this.id});
 
+  String getIndex(int index)
+  {
+    switch(index)
+    {
+      case 0:
+        return quantity.toString();
+        break;
+      case 1:
+        return remake.toString();
+        break;
+      case 2:
+        return balance.toString();
+        break;
+    }
+  }
+
   String getDateTimeInYYMMDD()
   {
 
@@ -34,17 +50,19 @@ class StockInfo
         'action'      : action
       };
 
-  void fromJson ( Map<String, dynamic> json) {
+  StockInfo fromJson ( Map<String, dynamic> json) {
     id = json['id'] as String;
     productID = json['productID'] as String;
     remake = json['remake'] as String;
     quantity = json['quantity'] as int;
     totalPrice = json['totalPrice'];
     balance = json['balance'];
+    print(balance);
     stockDate = DateTime.parse(json['stockDate']);
     unitPrice = json['unitPrice'];
     totalPrice = json['totalPrice'];
     action = json['action'];
+    return this;
   }
 }
 
@@ -69,10 +87,11 @@ class WithdrawInfo
         'signature' : signature,
       };
 
-  void fromJson ( Map<String, dynamic> json) {
+  WithdrawInfo fromJson ( Map<String, dynamic> json) {
     id = json['id'] as String;
     received = json['received'] as String;
     drawBy = json['drawBy'] as String;
     signature = json['signature'] as String;
+    return this;
   }
 }

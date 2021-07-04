@@ -5,6 +5,7 @@ import 'package:flutter_app/model/ProductInfo.dart';
 import 'package:flutter_app/model/StockInfo.dart';
 import 'package:flutter_app/widgets/constant.dart';
 import 'package:intl/intl.dart';
+import 'package:money2/money2.dart';
 
 
 class StockView extends StatefulWidget {
@@ -28,20 +29,51 @@ class _StockViewState extends State<StockView> {
 
   void refrash()
   {
-    updateProduct();
+
     setState(() {});
   }
 
-  void updateProduct() async
+  void updateProduct(List<String> totalPrices) async
   {
     print("testing update");
-    int total = 0;
-    List<StockInfo> info = await DatabaseService().getAllStock(widget.info.id).first;
-   // ref.stream.listen((document){});
-    info.forEach((element) { total += element.balance;});
+    int newBalance = 0;
+    Money newTotalPrice = parseMoney("0.00");
+    Money newAvgPrice = parseMoney("0.00");
 
-    widget.info.totalQuantity = total;
-    await DatabaseService().addProduct(widget.info);
+
+    for (int i = 0; i < stockList.length; ++i) {
+      print(i);
+
+      if (stockList[i].action) {
+        newTotalPrice +=
+            parseMoney(stockList[i].unitPrice) * stockList[i].quantity;
+        newBalance += stockList[i].quantity;
+      } else {
+        print(stockList[i].unitPrice);
+        newTotalPrice -=
+            parseMoney(stockList[i].unitPrice) * stockList[i].quantity;
+        newBalance -= stockList[i].quantity;
+      }
+      print("gg.com");
+      //Update average price
+      newAvgPrice = newTotalPrice / newBalance;
+      newAvgPrice = newTotalPrice / newBalance;
+      totalPrices.add(newTotalPrice.toString());
+      print(totalPrices);
+    }
+
+    print("Total price is " + newTotalPrice.toString());
+    print("Balance is " + newBalance.toString());
+    print("Average Price is" + newAvgPrice.toString());
+
+    /*********Updates the product table **************/
+
+        ProductInfo newProduct = widget.info;
+        newProduct.totalQuantity = newBalance;
+        newProduct.avgPrice = (double.parse(newAvgPrice.toString().substring(1)) * 100).toInt();
+        newProduct.totalPrice = (double.parse(newTotalPrice.toString().substring(1)) * 100).toInt();
+        await DatabaseService().addProduct(newProduct);
+
 
     //ref.stream.listen(updateProduct);
   }
@@ -72,6 +104,9 @@ class _StockViewState extends State<StockView> {
   }
 
   getStockRows() {
+    List<String> totalPrices = [];
+    updateProduct(totalPrices);
+
     DateFormat df = DateFormat("dd MMMM yyyy");
     final rows = List.generate(
         stockList.length,
@@ -85,7 +120,7 @@ class _StockViewState extends State<StockView> {
               : makeStockCell(stockList[index].quantity.toString()),
           makeStockCell(stockList[index].balance.toString()),
           makeStockCell(stockList[index].unitPrice.toString()),
-          makeStockCell(stockList[index].totalPrice.toString()),
+          makeStockCell(totalPrices[index].toString()),
           (stockList[index].remake == null)
               ? makeStockCell(stockList[index].remake)
               : makeStockCell(""),
@@ -103,7 +138,7 @@ class _StockViewState extends State<StockView> {
           if (snapshot.hasError) return Text(snapshot.error.toString());
           if (!snapshot.hasData) return Container();
           stockList = snapshot.data;
-
+          print(stockList);
           return DataTable(
               onSelectAll: (b) {},
               showCheckboxColumn: false,

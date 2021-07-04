@@ -2,6 +2,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_app/Page/PdfView.dart';
+import 'package:flutter_app/Service/DatabaseService.dart';
+import 'package:flutter_app/model/MasterData.dart';
 import 'package:flutter_app/model/ProductInfo.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -44,7 +46,7 @@ class _WithdrawFormState extends State<WithdrawForm> {
   TextEditingController remarks = TextEditingController();
   TextEditingController drawBy = TextEditingController();
   TextEditingController received = TextEditingController();
-
+  String curretnId = "";
 
 
 
@@ -217,24 +219,31 @@ Widget testIconCheck()
   }
 
   Widget inputTotalPrice(BuildContext context) {
-    final sgd = Currency.create('SGD', 2);
-    final unitPrice = sgd.parse(r'$10.25');
+
     print("Quantity is: "  + quantity.toString());
-    return Container(
-      height: 50,
-      child: Card(
-        color: HexColor.fromHex("#292929"),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: <Widget>[
-              Text("Total Price:", style: style_),
-              Spacer(),
-              Text((unitPrice * quantity).toString(), style: style_)
-            ],
+    return StreamBuilder<ProductInfo>(
+      stream: DatabaseService().getProduct(widget.info).asStream(),
+      builder: (context, snapshot) {
+        final sgd = Currency.create('SGD', 2);
+        final unitPrice = Money.fromInt(snapshot.data.avgPrice, sgd);
+        
+        return Container(
+          height: 50,
+          child: Card(
+            color: HexColor.fromHex("#292929"),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: <Widget>[
+                  Text("Total Price:", style: style_),
+                  Spacer(),
+                  Text((unitPrice * quantity).toString(), style: style_)
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      }
     );
   }
 
@@ -278,19 +287,52 @@ Widget testIconCheck()
     );
   }
 
-  Future<void> pdfView(BuildContext context) async {
 
-    print("testing");
-    StockInfo sInfo = StockInfo(id: Uuid().v4());
-    WithdrawInfo wInfo = WithdrawInfo(id: sInfo.id);
-    sInfo.quantity = this.quantity;
-    //sinfo.balance = this.price;
-    sInfo.stockDate = this.selectedDate;
-    sInfo.remake = this.remarks.text;
-    var temp = await _controller.toPngBytes();
-    wInfo.signature = temp.toString();
+
+  Future addNewStock() async {
+    StockInfo info = StockInfo();
+    info.id = Uuid().v4();
+    curretnId =  info.id;
+    info.productID = widget.info;
+    info.stockDate = selectedDate;
+    info.balance = quantity;
+    info.quantity = quantity;
+    info.remake = remarks.text;
+    info.action = false;
+
+
+    //Assume we get the latest data.
+    ProductInfo temp = await DatabaseService().getProduct(widget.info);
+
+    info.unitPrice = (temp.avgPrice.toDouble() / 100.0).toString();
+    info.totalPrice = ((temp.avgPrice * quantity).toDouble() / 100.0).toString();
+
+    //await DatabaseService().addProduct(widget.info);
+    await DatabaseService().addStock(info);
+    MasterData.instance.callSetState("stockUpdate");
+    //Navigator.pop(context);
+    //info.unitPrice = test.toString();
+    //Money test = Money.fromInt(1000, Currency.create('USD', 2));
+    //print(test.toString());
+    //Money test1 = Money.parse(test.toString(), Currency.create('USD', 2));
+    //print(test1.toString());
+    //info.unitPrice = ;
+
+    var temp1 = await _controller.toPngBytes();
+    WithdrawInfo wInfo = WithdrawInfo(id: info.id );
+    wInfo.signature = temp1.toString();
     wInfo.received = this.received.text;
     wInfo.drawBy = this.drawBy.text;
+
+    await DatabaseService().addStock2(info,wInfo);
+
+  }
+
+  Future<void> pdfView(BuildContext context) async {
+
+
+    StockInfo sInfo = await DatabaseService().getStockByID(curretnId);
+    WithdrawInfo wInfo = await DatabaseService().getWinfoByStockID(sInfo.id);
     return showDialog(
         context: context,
         builder: (context) {
@@ -372,7 +414,7 @@ Widget testIconCheck()
                   ),
                 ),
                 inputQuantity(context),
-                inputPrice(context),
+                //inputPrice(context),
                 Divider(
                   color: HexColor.fromHex("#979798"),
                 ),
@@ -390,7 +432,12 @@ Widget testIconCheck()
         ),
         actions: <Widget>
         [
-            TextButton(onPressed: (){pdfView(context);}, child: Text("PdfPreview"))
+            TextButton(onPressed:() async{
+              //pdfView(context);
+             await addNewStock();
+             await pdfView(context);
+              Navigator.pop(context);
+            }, child: Text("PdfPreview"))
         ],
       ),
     );

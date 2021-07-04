@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/Page/StockView.dart';
 
 import 'package:flutter_app/Service/DatabaseService.dart';
 import 'package:flutter_app/Util/Random.dart';
@@ -41,144 +42,8 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
   String price;
   String remarks;
 
-  /************************* Stock Stuff ************************************/
 
-  List<StockInfo> stockList;
-  int stockColumnIndex = 0;
-  bool isStockSort = true;
-  int selectedStockIndex = 0;
-  StockInfo stockInfo;
-  Money avgPrice;
-
-  //This updates the product's average price, total price and balance
-  Future updateProductData(String id) async {
-    /******Calculate average price, balance and total quantity ****/
-    int newBalance = 0;
-    Money newTotalPrice = parseMoney("0.00");
-    Money newAvgPrice = parseMoney("0.00");
-    List<String> totalPrices = [];
-
-    for (int i = 0; i < stockList.length; ++i) {
-      if (stockList[i].action) {
-        newTotalPrice +=
-            parseMoney(stockList[i].unitPrice) * stockList[i].quantity;
-        newBalance += stockList[i].quantity;
-      } else {
-        newTotalPrice -=
-            parseMoney(stockList[i].unitPrice) * stockList[i].quantity;
-        newBalance -= stockList[i].quantity;
-      }
-
-      //Update average price
-      newAvgPrice = newTotalPrice / newBalance;
-      newAvgPrice = newTotalPrice / newBalance;
-      totalPrices.add(newTotalPrice.toString());
-    }
-
-    print("Total price is " + newTotalPrice.toString());
-    print("Balance is " + newBalance.toString());
-    print("Average Price is" + newAvgPrice.toString());
-
- /*********Updates the product table **************/
-    for (int i = 0; i < list.length; ++i) {
-      if(id == list[i].id)
-        {
-          ProductInfo newProduct = list[i];
-          newProduct.totalQuantity = newBalance;
-          newProduct.avgPrice = double.parse(newAvgPrice.toString().substring(1));
-          newProduct.totalPrice = double.parse(newTotalPrice.toString().substring(1));
-          await DatabaseService().addProduct(newProduct);
-        }
-    }
-  }
-
-  DataCell makeStockCell(String value) {
-    if (value == null) value = "-";
-    return DataCell(
-        Text(value, style: primaryFont(primaryFontColour, size: 15)));
-  }
-
-  getStockRows(String id) {
-    DateFormat df = DateFormat("dd MMMM yyyy");
-    print(stockList[0].remake);
-
-    List<String> totalPrices = [];
-
-
-    updateProductData(id);
-
-    final rows = List.generate(
-        stockList.length,
-        (int index) => new DataRow(selected: false, cells: [
-              makeStockCell(df.format(stockList[index].stockDate).toString()),
-              (stockList[index].action)
-                  ? makeStockCell(stockList[index].quantity.toString())
-                  : makeStockCell(""),
-              (stockList[index].action)
-                  ? makeStockCell("")
-                  : makeStockCell(stockList[index].quantity.toString()),
-              makeStockCell(stockList[index].balance.toString()),
-              makeStockCell(stockList[index].unitPrice.toString()),
-              makeStockCell(totalPrices[index]),
-              (stockList[index].remake == null)
-                  ? makeStockCell(stockList[index].remake)
-                  : makeStockCell(""),
-            ]));
-
-    print(stockList);
-    return rows;
-  }
-
-  Widget generateStockTable(String id) {
-    print("ID is: " + id);
-    return StreamBuilder<List<StockInfo>>(
-        stream: DatabaseService().getAllStock(id),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) return Text(snapshot.error.toString());
-          if (!snapshot.hasData) return Container();
-          stockList = snapshot.data;
-
-          return DataTable(
-              onSelectAll: (b) {},
-              showCheckboxColumn: false,
-              sortColumnIndex: columnIndex,
-              sortAscending: isSort,
-              horizontalMargin: MediaQuery.of(context).size.width * 0.1,
-              headingTextStyle:
-                  primaryFont(primaryFontColour, size: 15, weight: 1),
-              dataTextStyle:
-                  primaryFont(primaryFontColour, size: 15, weight: 0),
-              columns: <DataColumn>[
-                DataColumn(
-                  label: Text("Date", textAlign: TextAlign.left),
-                ),
-                DataColumn(
-                  label: Text("In"),
-                ),
-                DataColumn(
-                  label: Text("Out"),
-                ),
-                DataColumn(
-                  label: Text("Balance"),
-                  numeric: true,
-                ),
-                DataColumn(
-                  label: Text("Unit Price"),
-                  numeric: true,
-                ),
-                DataColumn(
-                  label: Text("Total"),
-                  numeric: true,
-                ),
-                DataColumn(
-                  label: Text("Remarks"),
-                ),
-              ],
-              rows: getStockRows(id));
-        });
-  }
-
-  Future<void> viewStockRecord(String productID) {
+  Future<void> viewStockRecord(ProductInfo productID) {
     return showDialog(
         context: context,
         builder: (context) {
@@ -195,12 +60,12 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Text(productID.toString(),
+                    child: Text(productID.id.toString(),
                         style: primaryFont(primaryFontColour,
                             size: 20, weight: 1)),
                   ),
                 ),
-                content: generateStockTable(productID),
+                content: StockView(productID),
                 actions: <Widget>[
                   ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
@@ -255,7 +120,7 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                 IconButton(
                     splashRadius: 15,
                     onPressed: () {
-                      viewStockRecord(list[index].id.toString());
+                      viewStockRecord(list[index]);
                     },
                     icon: Icon(Icons.my_library_add_outlined),
                     iconSize: 15,
@@ -265,10 +130,8 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
                   style: primaryFont(primaryFontColour, size: 15))),
               DataCell(Text(list[index].totalQuantity.toString(),
                   style: primaryFont(primaryFontColour, size: 15))),
-              DataCell(Text(
-                  (sgd.parse(r'$' + list[index].totalPrice.toString()) /
-                          list[index].totalQuantity)
-                      .toString(),
+              DataCell( Text(list[index].totalQuantity == 0 ? "0.00" :
+                  Money.fromInt(list[index].avgPrice,sgd).toString(),
                   style: primaryFont(primaryFontColour, size: 15))),
             ]));
     return rows;
@@ -466,15 +329,15 @@ class _ProductInfoSelectSelectState extends State<ProductInfoSelect> {
     );
   }
 
-  Future<void> WithdrawForm1(String info, BuildContext context) {
+  Future<void> WithdrawForm1(ProductInfo info, BuildContext context) {
     return showDialog(
         context: context,
         builder: (context) {
-          return WithdrawForm(info: info);
+          return WithdrawForm(info: info.id);
         });
   }
 
-  Future<void> AddForm1(String info, BuildContext context) {
+  Future<void> AddForm1(ProductInfo info, BuildContext context) {
     return showDialog(
         context: context,
         builder: (context) {

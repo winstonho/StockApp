@@ -15,6 +15,7 @@ class DatabaseService {
   final CollectionReference companyCollection = Firestore.instance.collection("company");
   final CollectionReference productCollection = Firestore.instance.collection("product");
   final CollectionReference stockCollection = Firestore.instance.collection("stock");
+  final CollectionReference withdrawInfoCollection = Firestore.instance.collection("withdrawInfo");
 
   Future updateUserData(MyUser user) async {
     stockCollection.stream.listen((event) {print("");});
@@ -77,17 +78,41 @@ class DatabaseService {
   }
 
   Stream<List<StockInfo>> getAllStock(String productID) {
-    return stockCollection.where("productID", isEqualTo: productID ).get().asStream().map(_stockInfoFromSnapshot);
+    return stockCollection.where("productID", isEqualTo: productID ).orderBy("stockDate",descending: false).get().asStream().map(_stockInfoFromSnapshot);
   }
 
-  Future getProduct(String  id) async{
+  Future<StockInfo> getStockByID(String id) async{
     var temp =  await stockCollection.document(id).get();
-    if(temp != null)
+    if(temp != null) {
+      return StockInfo().fromJson(temp.map);
+    }
+    return null;
+  }
+  Future<WithdrawInfo> getWinfoByStockID(String id) async{
+    var temp =  await withdrawInfoCollection.document(id).get();
+    if(temp != null) {
+      return WithdrawInfo().fromJson(temp.map);
+    }
+    return null;
+  }
+
+
+
+  Future<ProductInfo> getProduct(String  id) async{
+    var temp =  await productCollection.document(id).get();
+    if(temp != null) {
+      print("hello");
       return ProductInfo().fromJson(temp.map);
+    }
   }
 
   Future addStock(StockInfo info) async{
     return await stockCollection.document(info.id).set(info.toJson());
+  }
+
+  Future addStock2(StockInfo info,WithdrawInfo winfo) async{
+     await stockCollection.document(info.id).set(info.toJson());
+     await withdrawInfoCollection.document(winfo.id).set(winfo.toJson());
   }
 
 
