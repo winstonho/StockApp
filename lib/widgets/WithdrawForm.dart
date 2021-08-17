@@ -48,8 +48,13 @@ class _WithdrawFormState extends State<WithdrawForm> {
   TextEditingController received = TextEditingController();
   String curretnId = "";
 
+  String unitPrice = '0.00';
 
-
+  bool quantityValid = true;
+  bool receivedValid = true;
+  bool withdrawnValid = true;
+  String withdrawnByStr = "";
+  String receivedByStr = "";
 
   final SignatureController _controller = SignatureController(
     penStrokeWidth: 1,
@@ -190,35 +195,6 @@ Widget testIconCheck()
     );
   }
 
-  Widget inputPrice(BuildContext context) {
-    return Container(
-      height: 50,
-      child: Card(
-        color: HexColor.fromHex("#292929"),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: <Widget>[
-              Icon(Icons.attach_money,
-                  color: HexColor.fromHex("#979798"), size: 15),
-              SizedBox(width: 20),
-              Expanded(
-                child: TextFormField(
-                  style: style_,
-                  decoration: InputDecoration(
-                    contentPadding: EdgeInsets.symmetric(vertical: 15),
-                    hintText: 'Unit Price',
-                    hintStyle: style_,
-                  ),
-                ),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget inputTotalPrice(BuildContext context) {
 
     print("Quantity is: "  + quantity.toString());
@@ -250,7 +226,7 @@ Widget testIconCheck()
 
   Widget inputQuantity(BuildContext context) {
     return Container(
-      height: 50,
+      height: 63,
       child: Card(
         color: HexColor.fromHex("#292929"),
         child: Padding(
@@ -268,15 +244,25 @@ Widget testIconCheck()
                     FilteringTextInputFormatter.digitsOnly
                   ],
                   // Only numbers can be entered
-                  decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 15),
-                      hintText: 'Quantity',
-                      hintStyle: style_,
-                      border: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.red))),
+
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: (value) {
+                      if (value == '' || int.parse(value) <= 0)
+                        return 'Please input a value more than 0';
+                    },
+                 decoration: formDecoration('Quantity'),
                   onChanged: (value) {
                     setState(() {
-                      quantity = int.parse(value);
+                      if (value == '')
+                        quantityValid = false;
+                      else {
+                        int v = int.parse(value);
+                        if (v > 0) {
+                          quantityValid = true;
+                          quantity = int.parse(value);
+                        } else
+                          quantityValid = false;
+                      }
                     });
                   },
                 ),
@@ -322,8 +308,8 @@ Widget testIconCheck()
     var temp1 = await _controller.toPngBytes();
     WithdrawInfo wInfo = WithdrawInfo(id: info.id );
     wInfo.signature = temp1.toString();
-    wInfo.received = this.received.text;
-    wInfo.drawBy = this.drawBy.text;
+    wInfo.received = receivedByStr;
+    wInfo.drawBy = withdrawnByStr;
 
     await DatabaseService().addStock2(info,wInfo);
 
@@ -341,6 +327,58 @@ Widget testIconCheck()
         });
   }
 
+  Widget receivedBy()
+  {
+    return  Card(
+      color: HexColor.fromHex("#292929"),
+      child: TextFormField(
+        onChanged: (value) {
+          setState(() {
+              if(value.isNotEmpty)
+                 receivedValid = true;
+              else
+                receivedValid = false;
+
+              receivedByStr = value;
+          });},
+        style: style_,
+        maxLines: null,
+        decoration: InputDecoration(
+          isDense: true,
+          contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+          hintText: 'Received by:',
+          hintStyle: style_,
+        ),
+      ),
+    );
+
+  }
+
+ Widget withdrawnBy()
+ {
+   return  Card(
+     color: HexColor.fromHex("#292929"),
+     child: TextFormField(
+       onChanged: (value) {
+         setState(() {
+           if(value.isNotEmpty)
+             withdrawnValid = true;
+           else
+             withdrawnValid = false;
+
+           withdrawnByStr = value;
+         });},
+       style: style_,
+       maxLines: null,
+       decoration: InputDecoration(
+         isDense: true,
+         contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+         hintText: 'Withdrawn by:',
+         hintStyle: style_,
+       ),
+     ),
+   );
+ }
 
 
 
@@ -415,12 +453,11 @@ Widget testIconCheck()
                   ),
                 ),
                 inputQuantity(context),
-                //inputPrice(context),
                 Divider(
                   color: HexColor.fromHex("#979798"),
                 ),
-                inputText("Withdrawn by:", this.drawBy,1, context),
-                inputText("Received by :", this.received,1, context),
+                withdrawnBy(),
+                receivedBy(),
                 Divider(
                   color: HexColor.fromHex("#979798"),
                 ),
@@ -438,7 +475,7 @@ Widget testIconCheck()
           ),
         ),
         actions: <Widget>
-        [ ElevatedButton.icon(
+        [ (quantityValid && withdrawnByStr.isNotEmpty && receivedByStr.isNotEmpty) ? ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                   primary: HexColor.fromHex("#313131"),
                   // background
@@ -450,7 +487,10 @@ Widget testIconCheck()
                 await addNewStock();
                 await pdfView(context);
                 Navigator.pop(context);
-              }),
+              }) : Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("Withdraw", style: primaryFont(primaryFontColour)),
+              )
         ],
       ),
     );
