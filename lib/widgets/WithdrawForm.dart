@@ -125,8 +125,9 @@ Widget testIconCheck()
           //SIGNATURE CANVAS
           Signature(
             controller: _controller,
-            height: 100,
-            backgroundColor: Colors.white,
+            width: 493,
+            height: 130,
+            backgroundColor: Colors.white24,
           ),
           //OK AND CLEAR BUTTONS
           SizedBox(height: 10),
@@ -425,19 +426,31 @@ Widget testIconCheck()
                 ),
                 inputTotalPrice(context),
                 inputText("Remark: ",this.remarks,2,context),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text("Signature: ", style: primaryFont(primaryFontColour, size: 13, weight: 0))),
+                ),
                 signature(),
               ],
             ),
           ),
         ),
         actions: <Widget>
-        [
-            TextButton(onPressed:() async{
-              //pdfView(context);
-             await addNewStock();
-             await pdfView(context);
-              Navigator.pop(context);
-            }, child: Text("PdfPreview"))
+        [ ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                  primary: HexColor.fromHex("#313131"),
+                  // background
+                  onPrimary: Colors.white),
+              label: Text("Withdraw", style: primaryFont(primaryFontColour)),
+              icon: Icon(Icons.remove,
+                  color: primaryFontColour, size: 13),
+              onPressed: () async {
+                await addNewStock();
+                await pdfView(context);
+                Navigator.pop(context);
+              }),
         ],
       ),
     );

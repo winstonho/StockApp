@@ -139,43 +139,45 @@ class _StockViewState extends State<StockView> {
           if (!snapshot.hasData) return Container();
           stockList = snapshot.data;
           print(stockList);
-          return DataTable(
-              onSelectAll: (b) {},
-              showCheckboxColumn: false,
-              sortColumnIndex: columnIndex,
-              sortAscending: isSort,
-              horizontalMargin: MediaQuery.of(context).size.width * 0.1,
-              headingTextStyle:
-              primaryFont(primaryFontColour, size: 15, weight: 1),
-              dataTextStyle:
-              primaryFont(primaryFontColour, size: 15, weight: 0),
-              columns: <DataColumn>[
-                DataColumn(
-                  label: Text("Date", textAlign: TextAlign.left),
-                ),
-                DataColumn(
-                  label: Text("In"),
-                ),
-                DataColumn(
-                  label: Text("Out"),
-                ),
-                DataColumn(
-                  label: Text("Balance"),
-                  numeric: true,
-                ),
-                DataColumn(
-                  label: Text("Unit Price"),
-                  numeric: false,
-                ),
-                DataColumn(
-                  label: Text("Total"),
-                  numeric: true,
-                ),
-                DataColumn(
-                  label: Text("Remarks"),
-                ),
-              ],
-              rows: getStockRows());
+          return SingleChildScrollView(
+            child: DataTable(
+                onSelectAll: (b) {},
+                showCheckboxColumn: false,
+                sortColumnIndex: columnIndex,
+                sortAscending: isSort,
+                horizontalMargin: MediaQuery.of(context).size.width * 0.1,
+                headingTextStyle:
+                primaryFont(primaryFontColour, size: 15, weight: 1),
+                dataTextStyle:
+                primaryFont(primaryFontColour, size: 15, weight: 0),
+                columns: <DataColumn>[
+                  DataColumn(
+                    label: Text("Date", textAlign: TextAlign.left),
+                  ),
+                  DataColumn(
+                    label: Text("In"),
+                  ),
+                  DataColumn(
+                    label: Text("Out"),
+                  ),
+                  DataColumn(
+                    label: Text("Balance"),
+                    numeric: true,
+                  ),
+                  DataColumn(
+                    label: Text("Unit Price"),
+                    numeric: false,
+                  ),
+                  DataColumn(
+                    label: Text("Total"),
+                    numeric: true,
+                  ),
+                  DataColumn(
+                    label: Text("Remarks"),
+                  ),
+                ],
+                rows: getStockRows()),
+          );
         });
   }
 
