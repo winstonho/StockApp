@@ -322,7 +322,7 @@ class Invoice {
           paddedHeadingTextCell('Rack'),
           paddedHeadingTextCell('BATCH'),
           paddedHeadingTextCell('SERIAL.NO(if any)'),
-          paddedHeadingTextCell('INITAL'),
+          paddedHeadingTextCell('INITIAL'),
           paddedHeadingTextCell('DATE'),
         ],
       ),
