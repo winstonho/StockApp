@@ -173,7 +173,7 @@ class _AddFormState extends State<AddForm> {
 
   Widget inputQuantity(BuildContext context) {
     return Container(
-      height: 60,
+      height: 63,
       child: Card(
         color: HexColor.fromHex("#292929"),
         child: Padding(
